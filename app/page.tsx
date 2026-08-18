@@ -29,8 +29,8 @@ export default function Home() {
           夜行手記 <span>after dusk</span>
         </a>
         <nav aria-label="主要選單">
-          <a href="#notes">文章</a>
-          <a href="#about">關於</a>
+          <a href="/articles">文章</a>
+          <a href="/about">關於</a>
           <a href="mailto:hello@example.com">寫信給我</a>
         </nav>
       </header>
@@ -56,7 +56,7 @@ export default function Home() {
               <span className="note-index">0{index + 1}</span>
               <div>
                 <p className="note-meta"><time>{note.date}</time> · {note.tag}</p>
-                <h3><a href="#">{note.title}</a></h3>
+                <h3><a href="/articles">{note.title}</a></h3>
                 <p>{note.excerpt}</p>
               </div>
               <span className="note-arrow" aria-hidden="true">↗</span>

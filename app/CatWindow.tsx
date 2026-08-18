@@ -37,8 +37,6 @@ export function CatWindow() {
         <div className="cat-head">
           <span className="ear left" /><span className="ear right" />
           <span className="eye left"><i /></span><span className="eye right"><i /></span>
-          <span className="muzzle" />
-          <span className="nose" /><span className="mouth left" /><span className="mouth right" />
           <span className="whisker w1" /><span className="whisker w2" /><span className="whisker w3" />
           <span className="whisker wr1" /><span className="whisker wr2" /><span className="whisker wr3" />
         </div>
