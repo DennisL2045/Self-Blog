@@ -24,7 +24,7 @@ export function CatWindow() {
         sceneRef.current?.style.setProperty("--look-x", "0px");
         sceneRef.current?.style.setProperty("--look-y", "0px");
       }}
-      aria-label="一隻趴在夜晚窗台上的大眼貓，眼睛會跟著游標移動"
+      aria-label="一隻趴在夜晚窗台上的黑色大眼貓，眼睛會跟著游標移動"
       role="img"
     >
       <div className="moon" />
@@ -37,6 +37,7 @@ export function CatWindow() {
         <div className="cat-head">
           <span className="ear left" /><span className="ear right" />
           <span className="eye left"><i /></span><span className="eye right"><i /></span>
+          <span className="muzzle" />
           <span className="nose" /><span className="mouth left" /><span className="mouth right" />
           <span className="whisker w1" /><span className="whisker w2" /><span className="whisker w3" />
           <span className="whisker wr1" /><span className="whisker wr2" /><span className="whisker wr3" />
