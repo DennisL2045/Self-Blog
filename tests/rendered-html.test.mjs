@@ -93,8 +93,10 @@ test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線",
   assert.match(postsRoute, /getStudioSessionFromRequest\(request\)/);
   assert.match(postsRoute, /isSameOriginMutation\(request\)/);
   assert.match(auth, /allowedEmails\.size >= 1/);
-  assert.match(auth, /SameSite=Strict/);
+  assert.match(auth, /SameSite=Lax/);
   assert.match(auth, /HttpOnly/);
+  assert.match(auth, /headers\(\)/);
+  assert.doesNotMatch(auth, /cookies\(\)/);
 });
 
 test("Google 登入回呼使用可寫入 Cookie 的重新導向回應", async () => {

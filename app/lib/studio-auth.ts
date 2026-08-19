@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { createRemoteJWKSet, jwtVerify, SignJWT } from "jose";
 import { getRuntimeEnv } from "./runtime";
 
@@ -95,8 +95,8 @@ export async function readStudioSessionToken(token?: string | null): Promise<Stu
 }
 
 export async function getStudioSession(): Promise<StudioSession | null> {
-  const cookieStore = await cookies();
-  return readStudioSessionToken(cookieStore.get(SESSION_COOKIE)?.value);
+  const requestHeaders = await headers();
+  return readStudioSessionToken(readCookie(requestHeaders.get("cookie"), SESSION_COOKIE));
 }
 
 export async function getStudioSessionFromRequest(request: Request): Promise<StudioSession | null> {
@@ -105,12 +105,12 @@ export async function getStudioSessionFromRequest(request: Request): Promise<Stu
 
 export function studioSessionCookie(request: Request, token: string): string {
   const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
-  return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${SESSION_DURATION_SECONDS}${secure}`;
+  return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_DURATION_SECONDS}${secure}`;
 }
 
 export function expiredStudioSessionCookie(request: Request): string {
   const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
-  return `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure}`;
+  return `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`;
 }
 
 export function readCookie(header: string | null, name: string): string | null {
