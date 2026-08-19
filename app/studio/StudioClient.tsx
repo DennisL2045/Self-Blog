@@ -31,7 +31,9 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
   const [templateId, setTemplateId] = useState(editorTemplates[0]?.id ?? "");
   const [previewMode, setPreviewMode] = useState<"preview" | "edit">("preview");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewBodyRef = useRef<HTMLDivElement>(null);
   const directEditorRef = useRef<HTMLTextAreaElement>(null);
+  const previewScrollRatioRef = useRef(0);
 
   function choose(post: PostRecord) {
     if (dirty && !window.confirm("目前修改尚未儲存，仍要切換文章嗎？")) return;
@@ -100,8 +102,23 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
   }
 
   function changePreviewMode(mode: "preview" | "edit") {
+    if (mode === previewMode) return;
+    const currentPane = previewMode === "preview" ? previewBodyRef.current : directEditorRef.current;
+    if (currentPane) {
+      const currentScrollableHeight = currentPane.scrollHeight - currentPane.clientHeight;
+      previewScrollRatioRef.current = currentScrollableHeight > 0
+        ? currentPane.scrollTop / currentScrollableHeight
+        : 0;
+    }
+
     setPreviewMode(mode);
-    if (mode === "edit") requestAnimationFrame(() => directEditorRef.current?.focus());
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const nextPane = mode === "preview" ? previewBodyRef.current : directEditorRef.current;
+      if (!nextPane) return;
+      const nextScrollableHeight = nextPane.scrollHeight - nextPane.clientHeight;
+      if (mode === "edit") directEditorRef.current?.focus({ preventScroll: true });
+      nextPane.scrollTop = previewScrollRatioRef.current * Math.max(0, nextScrollableHeight);
+    }));
   }
 
   async function save(nextStatus?: PostStatus) {
@@ -241,7 +258,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
                 </div>
               </header>
               {previewMode === "preview" ? (
-                <div className="studio-preview-body"><SafeMarkdown content={draft.content || "還沒有內容。"} /></div>
+                <div ref={previewBodyRef} className="studio-preview-body"><SafeMarkdown content={draft.content || "還沒有內容。"} /></div>
               ) : (
                 <textarea
                   ref={directEditorRef}

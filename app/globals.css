@@ -158,6 +158,19 @@ footer { background:#171820; color:#8e8983; display:flex; justify-content:space-
 .markdown-code pre { tab-size:2; font-size:.84rem; }
 .markdown-code code { font:inherit; }
 
+/* Markdown data tables */
+.markdown-table-wrap { margin:32px 0; overflow-x:auto; overscroll-behavior-inline:contain; border:1px solid #bdb3a7; background:#f2ece3; box-shadow:6px 6px 0 #d3c9bd; }
+.markdown-table-wrap table { width:100%; min-width:520px; border-collapse:collapse; }
+.markdown-table-wrap th, .markdown-table-wrap td { padding:13px 15px; border-right:1px solid #cfc5b8; text-align:left; vertical-align:top; }
+.markdown-table-wrap th:last-child, .markdown-table-wrap td:last-child { border-right:0; }
+.markdown-table-wrap thead { background:#282b35; color:#f1eadf; }
+.markdown-table-wrap th { font-weight:500; font-size:.78rem; line-height:1.55; letter-spacing:.04em; }
+.markdown-table-wrap td { border-top:1px solid #d2c8bc; color:#504a46; font-size:.86rem; line-height:1.7; }
+.markdown-table-wrap tbody tr:nth-child(even) { background:#e7ded2; }
+.markdown-table-wrap .align-center { text-align:center; }
+.markdown-table-wrap .align-right { text-align:right; }
+.markdown-table-wrap code { white-space:nowrap; }
+
 /* First real publishing workflow */
 .home-notes-state { margin:45px 0 0; padding:34px 0; border-top:1px solid rgba(32,31,38,.22); border-bottom:1px solid rgba(32,31,38,.22); color:#777069; text-align:center; }
 .studio-create-options { display:grid; gap:8px; }

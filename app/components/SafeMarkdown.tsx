@@ -26,6 +26,47 @@ export function SafeMarkdown({ content, className = "safe-markdown" }: { content
       continue;
     }
 
+    if (isTableStart(lines, index)) {
+      const headers = parseTableRow(lines[index]);
+      const alignments = parseTableRow(lines[index + 1]).map(tableAlignment);
+      const rows: string[][] = [];
+      index += 2;
+
+      while (index < lines.length && lines[index].trim() && looksLikeTableRow(lines[index])) {
+        const cells = parseTableRow(lines[index]);
+        rows.push(headers.map((_, cellIndex) => cells[cellIndex] ?? ""));
+        index += 1;
+      }
+
+      blocks.push(
+        <div className="markdown-table-wrap" key={`table-${index}`}>
+          <table>
+            <thead>
+              <tr>
+                {headers.map((cell, cellIndex) => (
+                  <th className={alignments[cellIndex]} key={`table-${index}-head-${cellIndex}`}>
+                    {renderInline(cell, `table-${index}-head-${cellIndex}`)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, rowIndex) => (
+                <tr key={`table-${index}-row-${rowIndex}`}>
+                  {row.map((cell, cellIndex) => (
+                    <td className={alignments[cellIndex]} key={`table-${index}-row-${rowIndex}-${cellIndex}`}>
+                      {renderInline(cell, `table-${index}-row-${rowIndex}-${cellIndex}`)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>,
+      );
+      continue;
+    }
+
     const heading = line.match(/^(#{1,3})\s+(.+)$/);
     if (heading) {
       const children = renderInline(heading[2], `heading-${index}`);
@@ -66,7 +107,7 @@ export function SafeMarkdown({ content, className = "safe-markdown" }: { content
 
     const paragraph: string[] = [line];
     index += 1;
-    while (index < lines.length && lines[index].trim() && !isBlockStart(lines[index])) {
+    while (index < lines.length && lines[index].trim() && !isBlockStart(lines, index)) {
       paragraph.push(lines[index]);
       index += 1;
     }
@@ -76,8 +117,50 @@ export function SafeMarkdown({ content, className = "safe-markdown" }: { content
   return <div className={className}>{blocks}</div>;
 }
 
-function isBlockStart(line: string) {
-  return line.startsWith("```") || /^(#{1,3})\s+/.test(line) || /^[-*]\s+/.test(line) || /^\d+\.\s+/.test(line) || line.startsWith("> ");
+function isBlockStart(lines: string[], index: number) {
+  const line = lines[index];
+  return line.startsWith("```") || isTableStart(lines, index) || /^(#{1,3})\s+/.test(line) || /^[-*]\s+/.test(line) || /^\d+\.\s+/.test(line) || line.startsWith("> ");
+}
+
+function isTableStart(lines: string[], index: number) {
+  if (index + 1 >= lines.length) return false;
+  const headers = parseTableRow(lines[index]);
+  const dividers = parseTableRow(lines[index + 1]);
+  return headers.length >= 2
+    && dividers.length === headers.length
+    && dividers.every((cell) => /^:?-{3,}:?$/.test(cell.replaceAll(" ", "")));
+}
+
+function looksLikeTableRow(line: string) {
+  return line.includes("|") && parseTableRow(line).length >= 2;
+}
+
+function parseTableRow(line: string) {
+  const source = line.trim().replace(/^\|/, "").replace(/\|$/, "");
+  const cells: string[] = [];
+  let cell = "";
+
+  for (let index = 0; index < source.length; index += 1) {
+    if (source[index] === "\\" && source[index + 1] === "|") {
+      cell += "|";
+      index += 1;
+    } else if (source[index] === "|") {
+      cells.push(cell.trim());
+      cell = "";
+    } else {
+      cell += source[index];
+    }
+  }
+
+  cells.push(cell.trim());
+  return cells;
+}
+
+function tableAlignment(divider: string) {
+  const value = divider.replaceAll(" ", "");
+  if (value.startsWith(":") && value.endsWith(":")) return "align-center";
+  if (value.endsWith(":")) return "align-right";
+  return "align-left";
 }
 
 function renderInline(text: string, keyPrefix: string): ReactNode[] {

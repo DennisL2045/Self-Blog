@@ -91,10 +91,27 @@ test("編輯室右側可直接改文並使用獨立滾動區", async () => {
   assert.match(editor, />直接編輯</);
   assert.match(editor, /className="studio-direct-editor"/);
   assert.match(editor, /onChange=\{\(event\) => change\("content", event\.target\.value\)\}/);
+  assert.match(editor, /previewScrollRatioRef/);
+  assert.match(editor, /previewBodyRef/);
+  assert.match(editor, /nextPane\.scrollTop/);
+  assert.match(editor, /focus\(\{ preventScroll: true \}\)/);
   assert.match(styles, /\.studio-preview-body[^}]*overflow-y:auto/);
   assert.match(styles, /\.studio-direct-editor[^}]*overflow-y:auto/);
   assert.match(styles, /\.studio-layout \{ height:calc\(100svh - 86px\)/);
   assert.match(styles, /overscroll-behavior:contain/);
+});
+
+test("Markdown 表格會顯示為可橫向捲動的資料表", async () => {
+  const [markdown, styles] = await Promise.all([
+    readFile(new URL("../app/components/SafeMarkdown.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(markdown, /isTableStart\(lines, index\)/);
+  assert.match(markdown, /className="markdown-table-wrap"/);
+  assert.match(markdown, /<table>/);
+  assert.match(markdown, /renderInline\(cell/);
+  assert.match(styles, /\.markdown-table-wrap[^}]*overflow-x:auto/);
+  assert.match(styles, /\.markdown-table-wrap table[^}]*border-collapse:collapse/);
 });
 
 test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線", async () => {
