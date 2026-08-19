@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { TopBar } from "../TopBar";
 import { LivePublishedPosts } from "../components/LivePublishedPosts";
-import { techArticles, techCategories } from "../content/tech";
-import { TechExplorer } from "./TechExplorer";
+import { techCategories } from "../content/tech";
 
 export default function TechPage() {
   return (
@@ -29,8 +28,7 @@ export default function TechPage() {
           <b>打開名詞小冊 ↗</b>
         </Link>
       </section>
-      <TechExplorer categories={techCategories} articles={techArticles} />
-      <section className="published-tech"><div><p>From the studio</p><h2>新發布的技術札記</h2></div><LivePublishedPosts category="tech" /></section>
+      <section className="published-tech"><div><p>Growing library</p><h2>技術札記</h2></div><LivePublishedPosts category="tech" emptyText="第一篇技術文章準備中。發布後會依主題顯示在這裡。" /></section>
     </main>
   );
 }

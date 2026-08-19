@@ -10,6 +10,7 @@ export async function GET(request: Request) {
       title: post.title,
       excerpt: post.excerpt,
       category: post.category,
+      topic: post.topic,
       publishedAt: post.publishedAt,
       updatedAt: post.updatedAt,
     }));

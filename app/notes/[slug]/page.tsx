@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { TopBar } from "../../TopBar";
 import { SafeMarkdown } from "../../components/SafeMarkdown";
 import { getPublishedPostBySlug } from "../../lib/posts";
+import { categoryLabel, topicLabel } from "../../lib/post-taxonomy";
 
 export const dynamic = "force-dynamic";
 
@@ -29,16 +30,12 @@ export default async function PublishedNotePage({ params }: { params: Promise<{ 
     <main className="inner-page published-reading-page">
       <TopBar />
       <article className="published-reading">
-        <header><p>{categoryLabel(post.category)}</p><h1>{post.title}</h1><div>{post.excerpt}</div><time>{formatDate(post.publishedAt ?? post.updatedAt)}</time></header>
+        <header><p>{categoryLabel(post.category)} · {topicLabel(post.topic)}</p><h1>{post.title}</h1><div>{post.excerpt}</div><time>{formatDate(post.publishedAt ?? post.updatedAt)}</time></header>
         <SafeMarkdown content={post.content} />
         <footer><Link href="/notes">← 回到所有札記</Link><span>夜行手札 · slowly documented</span></footer>
       </article>
     </main>
   );
-}
-
-function categoryLabel(category: string) {
-  return category === "tech" ? "技術成長" : category === "quick-look" ? "簡單看看" : category === "experience" ? "個人經歷" : "出遊手札";
 }
 
 function formatDate(value: string) {

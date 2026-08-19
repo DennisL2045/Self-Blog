@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CodeBlock } from "./CodeBlock";
 
 export function SafeMarkdown({ content, className = "safe-markdown" }: { content: string; className?: string }) {
   const lines = content.replaceAll("\r\n", "\n").split("\n");
@@ -21,7 +22,7 @@ export function SafeMarkdown({ content, className = "safe-markdown" }: { content
         index += 1;
       }
       index += 1;
-      blocks.push(<div className="markdown-code" key={`code-${index}`}><small>{language || "code"}</small><pre><code>{code.join("\n")}</code></pre></div>);
+      blocks.push(<CodeBlock code={code.join("\n")} language={language} key={`code-${index}`} />);
       continue;
     }
 

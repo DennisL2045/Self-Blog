@@ -29,7 +29,7 @@ export function getStudioConfiguration() {
     clientId,
     sessionSecret,
     allowedEmails,
-    ready: Boolean(clientId && sessionSecret.length >= 32 && allowedEmails.size >= 2),
+    ready: Boolean(clientId && sessionSecret.length >= 32 && allowedEmails.size >= 1),
   };
 }
 

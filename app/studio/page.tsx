@@ -23,7 +23,7 @@ export default async function StudioPage({ searchParams }: { searchParams: Promi
   const error = errors[(await searchParams).error ?? ""];
 
   if (!config.ready) {
-    return <main className="studio-gate"><section><span>Private studio</span><h1>夜行編輯室尚未啟用</h1><p>資料與圖片空間已經隔離完成。為避免錯誤帳號取得權限，Google Client ID、主要帳號與備援帳號完成設定前，所有編輯功能都會保持關閉。</p></section></main>;
+    return <main className="studio-gate"><section><span>Private studio</span><h1>夜行編輯室尚未啟用</h1><p>資料與圖片空間已經隔離完成。Google Client ID、安全工作階段與至少一個白名單帳號完成設定前，所有編輯功能都會保持關閉。</p></section></main>;
   }
 
   if (!session) {
@@ -34,7 +34,7 @@ export default async function StudioPage({ searchParams }: { searchParams: Promi
     return (
       <main className="studio-gate">
         <section>
-          <span>Private studio</span><h1>夜行編輯室</h1><p>這裡沒有公開入口。請使用已加入白名單的主要或備援 Google 帳號繼續。</p>
+          <span>Private studio</span><h1>夜行編輯室</h1><p>這裡沒有公開入口。請使用已加入白名單的 Google 帳號繼續。</p>
           {error && <div className="studio-login-error" role="alert">{error}</div>}
           <div id="g_id_onload" data-client_id={config.clientId} data-login_uri={loginUri} data-ux_mode="redirect" data-auto_prompt="false" data-itp_support="true" />
           <div className="g_id_signin" data-type="standard" data-theme="filled_black" data-size="large" data-text="signin_with" data-shape="pill" data-logo_alignment="left" />

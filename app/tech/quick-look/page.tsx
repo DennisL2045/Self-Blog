@@ -18,7 +18,7 @@ export default function QuickLookPage() {
             </article>
           ))}
         </div>
-        <section className="published-quick"><div><p>More tools</p><h2>延伸名詞札記</h2></div><LivePublishedPosts category="quick-look" /></section>
+        <section className="published-quick"><div><p>More tools</p><h2>延伸名詞札記</h2></div><LivePublishedPosts category="quick-look" emptyText="尚未發布延伸名詞文章。" /></section>
       </section>
     </main>
   );

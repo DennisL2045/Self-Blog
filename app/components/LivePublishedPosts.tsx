@@ -1,12 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import type { PostCategory, PostRecord } from "../lib/posts";
 import { PublishedPostList } from "./PublishedPostList";
 
-export function LivePublishedPosts({ category, emptyText, fallback = null }: { category?: PostCategory; emptyText?: string; fallback?: ReactNode }) {
-  const [posts, setPosts] = useState<PostRecord[] | null>(null);
+export function LivePublishedPosts({ category, emptyText }: { category?: PostCategory; emptyText?: string }) {
+  const [posts, setPosts] = useState<PostRecord[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -23,7 +22,5 @@ export function LivePublishedPosts({ category, emptyText, fallback = null }: { c
     return () => controller.abort();
   }, [category]);
 
-  if (posts === null) return fallback;
-  if (!posts.length && fallback) return fallback;
   return <PublishedPostList posts={posts} emptyText={emptyText} />;
 }

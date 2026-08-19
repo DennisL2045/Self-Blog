@@ -2,21 +2,23 @@
 
 import { useRef, useState } from "react";
 import { SafeMarkdown } from "../components/SafeMarkdown";
+import { editorTemplates, getEditorTemplate } from "../content/editor-templates";
 import type { PostCategory, PostRecord, PostStatus } from "../lib/posts";
+import {
+  categoryLabel,
+  defaultTopicForCategory,
+  postTaxonomy,
+  topicLabel,
+  topicsForCategory,
+} from "../lib/post-taxonomy";
 
-const categoryLabels: Record<PostCategory, string> = {
-  tech: "技術成長",
-  "quick-look": "簡單看看",
-  experience: "個人經歷",
-  travel: "出遊手札",
-};
-
-const emptyDraft = (): Pick<PostRecord, "title" | "slug" | "excerpt" | "content" | "category" | "status"> => ({
+const emptyDraft = (): Pick<PostRecord, "title" | "slug" | "excerpt" | "content" | "category" | "topic" | "status"> => ({
   title: "未命名札記",
   slug: "",
   excerpt: "",
   content: "",
   category: "tech",
+  topic: "javascript",
   status: "draft",
 });
 
@@ -26,6 +28,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [templateId, setTemplateId] = useState(editorTemplates[0]?.id ?? "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function choose(post: PostRecord) {
@@ -41,26 +44,57 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
     setDirty(true);
   }
 
-  async function createNew() {
+  async function createNew(selectedTemplateId?: string) {
     if (dirty && !window.confirm("目前修改尚未儲存，仍要建立新文章嗎？")) return;
     setBusy(true);
     setMessage("");
     try {
+      const template = selectedTemplateId ? getEditorTemplate(selectedTemplateId) : undefined;
+      const payload = template
+        ? { ...template, id: undefined, description: undefined, label: undefined, status: "draft" as const }
+        : emptyDraft();
       const response = await fetch("/api/studio/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(emptyDraft()),
+        body: JSON.stringify(payload),
       });
       const data = await response.json() as { post?: PostRecord; error?: string };
       if (!response.ok || !data.post) throw new Error(data.error ?? "建立失敗");
       setPosts((current) => [data.post!, ...current]);
       setDraft(data.post);
       setDirty(false);
+      setMessage(template ? "JavaScript 文章範本已建立為草稿，不會自動發布。" : "空白草稿已建立。" );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "建立失敗");
     } finally {
       setBusy(false);
     }
+  }
+
+  function changeCategory(category: PostCategory) {
+    if (!draft) return;
+    setDraft({ ...draft, category, topic: defaultTopicForCategory(category) });
+    setDirty(true);
+  }
+
+  function applyTemplate() {
+    if (!draft) return;
+    const template = getEditorTemplate(templateId);
+    if (!template) return;
+    const hasWriting = draft.content.trim() || (draft.title.trim() && draft.title !== "未命名札記") || draft.excerpt.trim();
+    if (hasWriting && !window.confirm("套用範本會取代目前的標題、摘要與內容，確定繼續嗎？")) return;
+    setDraft({
+      ...draft,
+      title: template.title,
+      slug: template.slug,
+      excerpt: template.excerpt,
+      content: template.content,
+      category: template.category,
+      topic: template.topic,
+      status: "draft",
+    });
+    setDirty(true);
+    setMessage("範本已放入目前草稿；內容尚未儲存，也不會自動發布。" );
   }
 
   async function save(nextStatus?: PostStatus) {
@@ -149,11 +183,14 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
       </header>
       <div className="studio-layout">
         <aside className="studio-sidebar">
-          <button className="studio-new" onClick={createNew} disabled={busy}>＋ 新文章</button>
+          <div className="studio-create-options">
+            <button className="studio-new" onClick={() => void createNew()} disabled={busy}>＋ 空白文章</button>
+            <button className="studio-template-new" onClick={() => void createNew("javascript-var-let-const")} disabled={busy}>用 JS 範本開始</button>
+          </div>
           <nav aria-label="文章草稿">
             {posts.map((post) => (
               <button key={post.id} className={post.id === draft?.id ? "active" : ""} onClick={() => choose(post)}>
-                <span>{categoryLabels[post.category]} · {statusLabel(post.status)}</span><strong>{post.title}</strong><small>{new Date(post.updatedAt).toLocaleString("zh-TW")}</small>
+                <span>{categoryLabel(post.category)} · {topicLabel(post.topic)}</span><strong>{post.title}</strong><small>{statusLabel(post.status)} · {new Date(post.updatedAt).toLocaleString("zh-TW")}</small>
               </button>
             ))}
           </nav>
@@ -161,10 +198,21 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
         {draft ? (
           <section className="studio-editor">
             <div className="studio-fields">
+              <section className="studio-template-panel" aria-labelledby="studio-template-title">
+                <div><span>Writing template</span><strong id="studio-template-title">文章範本</strong><small>只填入草稿，不會自動儲存或發布。</small></div>
+                <select value={templateId} onChange={(event) => setTemplateId(event.target.value)} aria-label="選擇文章範本">
+                  {editorTemplates.map((template) => <option key={template.id} value={template.id}>{template.label}</option>)}
+                </select>
+                <button type="button" onClick={applyTemplate}>套用範本</button>
+              </section>
               <label><span>標題</span><input value={draft.title} onChange={(event) => change("title", event.target.value)} maxLength={160} /></label>
               <div className="studio-field-row">
-                <label><span>分類</span><select value={draft.category} onChange={(event) => change("category", event.target.value as PostCategory)}>{Object.entries(categoryLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
+                <label><span>文章書架</span><select value={draft.category} onChange={(event) => changeCategory(event.target.value as PostCategory)}>{Object.entries(postTaxonomy).map(([value, item]) => <option value={value} key={value}>{item.label}</option>)}</select><small className="studio-field-help">發布後會流向這個公開區塊。</small></label>
+                <label><span>主題類型</span><select value={draft.topic} onChange={(event) => change("topic", event.target.value as PostRecord["topic"])}>{topicsForCategory(draft.category).map((topic) => <option value={topic.value} key={topic.value}>{topic.label}</option>)}</select><small className="studio-field-help">用來標示文章的具體技術或內容主題。</small></label>
+              </div>
+              <div className="studio-field-row studio-field-row-wide">
                 <label><span>網址代稱</span><input value={draft.slug} onChange={(event) => change("slug", event.target.value)} placeholder="留白會自動產生" maxLength={80} /></label>
+                <label><span>目前流向</span><output className="studio-destination">{categoryLabel(draft.category)} <b>→</b> {topicLabel(draft.topic)}</output></label>
               </div>
               <label><span>文章摘要</span><textarea className="studio-excerpt" value={draft.excerpt} onChange={(event) => change("excerpt", event.target.value)} maxLength={500} /></label>
               <div className="editor-toolbar" aria-label="內容格式工具">
@@ -172,7 +220,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
                 <button type="button" onClick={() => applyMarkup("**", "**")}>粗體</button>
                 <button type="button" onClick={() => applyMarkup("- ", "", "清單項目")}>清單</button>
                 <button type="button" onClick={() => applyMarkup("[", "](https://)", "連結文字")}>連結</button>
-                <button type="button" onClick={() => applyMarkup("```ts\n", "\n```", "程式碼")}>程式碼</button>
+                <button type="button" onClick={() => applyMarkup(`\`\`\`${codeFenceLanguage(draft.topic)}\n`, "\n```", "程式碼")}>程式碼</button>
                 <label className="image-upload">貼照片<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void uploadImage(event.target.files?.[0]); event.currentTarget.value = ""; }} /></label>
               </div>
               <label><span>內容</span><textarea ref={textareaRef} className="studio-content" value={draft.content} onChange={(event) => change("content", event.target.value)} placeholder="從這裡開始寫。可以使用上方工具加入標題、清單、程式碼和照片。" /></label>
@@ -185,7 +233,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
             {message && <p className="studio-message" role="status">{message}</p>}
           </section>
         ) : (
-          <section className="studio-welcome"><span>☾</span><h2>今晚想記下什麼？</h2><p>先建立一篇文章，所有內容都只會保存為草稿，直到你按下發布。</p><button onClick={createNew} disabled={busy}>建立第一篇文章</button>{message && <p role="status">{message}</p>}</section>
+          <section className="studio-welcome"><span>☾</span><h2>從第一篇文章開始</h2><p>可以直接使用「var、let、const」範本。建立後仍是私人草稿，只有按下發布才會出現在技術成長的 JavaScript 主題。</p><div><button onClick={() => void createNew("javascript-var-let-const")} disabled={busy}>用 JS 範本開始</button><button className="secondary" onClick={() => void createNew()} disabled={busy}>建立空白文章</button></div>{message && <p role="status">{message}</p>}</section>
         )}
       </div>
     </div>
@@ -194,4 +242,10 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
 
 function statusLabel(status: PostStatus) {
   return status === "published" ? "已發布" : status === "archived" ? "已封存" : "草稿";
+}
+
+function codeFenceLanguage(topic: PostRecord["topic"]) {
+  if (topic === "javascript") return "js";
+  if (topic === "database") return "sql";
+  return "text";
 }

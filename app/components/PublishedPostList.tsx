@@ -1,12 +1,6 @@
 import Link from "next/link";
 import type { PostRecord } from "../lib/posts";
-
-const categoryLabels = {
-  tech: "技術成長",
-  "quick-look": "簡單看看",
-  experience: "個人經歷",
-  travel: "出遊手札",
-} as const;
+import { categoryLabel, topicLabel } from "../lib/post-taxonomy";
 
 export function PublishedPostList({ posts, emptyText }: { posts: PostRecord[]; emptyText?: string }) {
   if (!posts.length) return emptyText ? <p className="published-empty">{emptyText}</p> : null;
@@ -15,7 +9,7 @@ export function PublishedPostList({ posts, emptyText }: { posts: PostRecord[]; e
       {posts.map((post, index) => (
         <article key={post.id}>
           <span>{String(index + 1).padStart(2, "0")}</span>
-          <div><p>{categoryLabels[post.category]} · {formatDate(post.publishedAt ?? post.updatedAt)}</p><h2><Link href={`/notes/${post.slug}`}>{post.title}</Link></h2><div>{post.excerpt}</div></div>
+          <div><p>{categoryLabel(post.category)} · {topicLabel(post.topic)} · {formatDate(post.publishedAt ?? post.updatedAt)}</p><h2><Link href={`/notes/${post.slug}`}>{post.title}</Link></h2><div>{post.excerpt}</div></div>
           <Link href={`/notes/${post.slug}`} aria-label={`閱讀${post.title}`}>↗</Link>
         </article>
       ))}

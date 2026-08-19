@@ -2,30 +2,6 @@ import Link from "next/link";
 import { CatWindow } from "./CatWindow";
 import { HomeLatestNotes } from "./components/HomeLatestNotes";
 
-const notes = [
-  {
-    date: "08.19",
-    tag: "JavaScript",
-    title: "JavaScript 非同步流程是如何運作的",
-    excerpt: "從 Call Stack、Promise 到 Microtask，理解 Event Loop 的執行順序。",
-    href: "/tech/javascript-async-flow",
-  },
-  {
-    date: "08.19",
-    tag: "後端與資料",
-    title: "API 冪等性：避免同一筆操作被執行兩次",
-    excerpt: "以建立訂單為例，整理 Idempotency Key、唯一鍵與交易的關係。",
-    href: "/tech/api-idempotency",
-  },
-  {
-    date: "08.19",
-    tag: "簡單看看",
-    title: "Git、Docker、Redis 到底用在哪裡？",
-    excerpt: "先用一點時間認識職缺裡常見的工程工具，再決定要往哪裡深入。",
-    href: "/tech/quick-look",
-  },
-];
-
 export default function Home() {
   return (
     <main>
@@ -67,7 +43,7 @@ export default function Home() {
           <p>Latest notes</p>
           <h2 id="notes-title">最近寫下的</h2>
         </div>
-        <HomeLatestNotes fallback={notes} />
+        <HomeLatestNotes />
       </section>
 
       <section className="about" id="about">
@@ -76,7 +52,7 @@ export default function Home() {
           <p className="eyebrow">About this place</p>
           <h2>寫給還醒著的人</h2>
         </div>
-        <p>技術不急著背完，生活也不急著下結論。這裡把複雜概念慢慢拆開，也留下做過的事與走過的地方。希望你來到這裡時，能像貓一樣，找到舒服的位置趴一會兒。</p>
+        <p>技術不急著解讀完，生活也還得慢慢品嘗。這裡把複雜與概念慢慢拆解，也留下做過的事與走過的地方。期許你我來到這裡時，能像貓一樣，找到舒服的位置趴一會兒。</p>
       </section>
 
       <footer>

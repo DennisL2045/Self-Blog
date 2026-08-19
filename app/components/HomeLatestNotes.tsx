@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { PostRecord } from "../lib/posts";
+import { topicLabel } from "../lib/post-taxonomy";
 
 type HomeNote = { date: string; tag: string; title: string; excerpt: string; href: string };
 
-export function HomeLatestNotes({ fallback }: { fallback: HomeNote[] }) {
-  const [notes, setNotes] = useState(fallback);
+export function HomeLatestNotes() {
+  const [notes, setNotes] = useState<HomeNote[] | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -17,19 +18,21 @@ export function HomeLatestNotes({ fallback }: { fallback: HomeNote[] }) {
         return await response.json() as { posts?: PostRecord[] };
       })
       .then((data) => {
-        if (!data.posts?.length) return;
-        const live = data.posts.slice(0, 3).map((post) => ({
+        const live = (data.posts ?? []).slice(0, 3).map((post) => ({
           date: new Intl.DateTimeFormat("zh-TW", { month: "2-digit", day: "2-digit" }).format(new Date(post.publishedAt ?? post.updatedAt)),
-          tag: post.category === "tech" ? "技術成長" : post.category === "quick-look" ? "簡單看看" : post.category === "experience" ? "個人經歷" : "出遊手札",
+          tag: topicLabel(post.topic),
           title: post.title,
           excerpt: post.excerpt,
           href: `/notes/${post.slug}`,
         }));
-        setNotes([...live, ...fallback].slice(0, 3));
+        setNotes(live);
       })
-      .catch(() => undefined);
+      .catch(() => setNotes([]));
     return () => controller.abort();
-  }, [fallback]);
+  }, []);
+
+  if (notes === null) return <p className="home-notes-state">正在看看書架上有沒有新文章…</p>;
+  if (!notes.length) return <p className="home-notes-state">第一篇文章準備中。發布後會從這裡開始累積。</p>;
 
   return <div className="note-list">{notes.map((note, index) => (
     <article className="note" key={`${note.href}-${note.title}`}>
