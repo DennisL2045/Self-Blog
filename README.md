@@ -1,100 +1,57 @@
-# vinext-starter
+# 夜行手札
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+以 TypeScript 與 vinext 建立的個人內容網站。公開網站只讀取已發布文章；`/studio` 是沒有公開導覽入口的私人寫作區。
 
-## Prerequisites
+## 內容區域
 
-- Node.js `>=22.13.0`
+- 技術成長：技術原理、範例與實務取捨
+- 簡單看看：工程工具名詞與常見使用情境
+- 個人經歷：專案、學習歷程與回顧
+- 出遊手札：旅程、照片與文字記錄
 
-## Quick Start
+## 私人編輯室
+
+編輯室使用 Google Identity Services 驗證身分，再由伺服器端帳號白名單決定是否能讀寫。登入成功不等於取得權限；所有文章與圖片 API 都會再次驗證工作階段。
+
+安全設計包含：
+
+- 主要與備援 Google 帳號必須同時設定
+- 12 小時、`HttpOnly`、`SameSite=Strict` 的簽章工作階段
+- 寫入請求的同源檢查
+- 草稿、發布與軟封存狀態
+- 編輯前自動保存上一版內容
+- 跨裝置版本衝突檢查
+- Markdown 不允許原始 HTML，公開頁面不使用 `dangerouslySetInnerHTML`
+- 圖片限制為 JPG、PNG、WebP 與 8 MB 以下
+- 圖片發布前重新編碼為 WebP，移除 GPS、EXIF 與其他原始中繼資料
+- 圖片存放在 R2，文章與版本紀錄存放在 D1
+
+## Google 設定
+
+在 Google Cloud Console 建立「Web application」OAuth Client，加入：
+
+- Authorized JavaScript origin：`https://night-notes-cat.songming1111.chatgpt.site`
+- Authorized redirect URI：`https://night-notes-cat.songming1111.chatgpt.site/api/studio/session`
+- 本機開發可另加 `http://localhost:3000` 與 `http://localhost:3000/api/studio/session`
+
+執行環境需要下列值，格式可參考 `.env.example`：
+
+- `GOOGLE_CLIENT_ID`：Google Web Client ID；這是公開識別碼，不是 Client Secret
+- `EDITOR_ALLOWED_EMAILS`：以逗號分隔的主要與備援 Google 信箱
+- `SESSION_SECRET`：至少 32 字元的隨機秘密，只能存在伺服器環境
+
+為避免主要帳號失效時連 OAuth 設定也無法管理，備援帳號也應加入同一個 Google Cloud 專案的管理權限。不要把 Client Secret、Session Secret 或任何 Token 寫入 Git。
+
+## 開發
+
+需求：Node.js `>=22.13.0`。
 
 ```bash
 npm install
 npm run dev
 npm run build
+npm run lint
+npm test
 ```
 
-This starter does not use `wrangler.jsonc`.
-
-## Included Shape
-
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+資料表異動後執行 `npm run db:generate`，並檢查 `drizzle/` 產生的 SQL 遷移。

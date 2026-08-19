@@ -23,6 +23,7 @@ export function TopBar() {
         <Link href="/tech">技術成長</Link>
         <Link href="/experience">個人經歷</Link>
         <Link href="/travel">出遊手札</Link>
+        <Link href="/notes">所有札記</Link>
         <Link href="/about">關於</Link>
         <Link href="/about#contact">聯絡我</Link>
       </nav>

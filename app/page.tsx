@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CatWindow } from "./CatWindow";
+import { HomeLatestNotes } from "./components/HomeLatestNotes";
 
 const notes = [
   {
@@ -36,6 +37,7 @@ export default function Home() {
           <Link href="/tech">技術成長</Link>
           <Link href="/experience">個人經歷</Link>
           <Link href="/travel">出遊手札</Link>
+          <Link href="/notes">所有札記</Link>
           <Link href="/about">關於</Link>
         </nav>
       </header>
@@ -65,19 +67,7 @@ export default function Home() {
           <p>Latest notes</p>
           <h2 id="notes-title">最近寫下的</h2>
         </div>
-        <div className="note-list">
-          {notes.map((note, index) => (
-            <article className="note" key={note.title}>
-              <span className="note-index">0{index + 1}</span>
-              <div>
-                <p className="note-meta"><time>{note.date}</time> · {note.tag}</p>
-                <h3><Link href={note.href}>{note.title}</Link></h3>
-                <p>{note.excerpt}</p>
-              </div>
-              <span className="note-arrow" aria-hidden="true">↗</span>
-            </article>
-          ))}
-        </div>
+        <HomeLatestNotes fallback={notes} />
       </section>
 
       <section className="about" id="about">

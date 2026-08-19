@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { TopBar } from "../TopBar";
+import { LivePublishedPosts } from "../components/LivePublishedPosts";
 import { techArticles, techCategories } from "../content/tech";
 import { TechExplorer } from "./TechExplorer";
 
@@ -29,6 +30,7 @@ export default function TechPage() {
         </Link>
       </section>
       <TechExplorer categories={techCategories} articles={techArticles} />
+      <section className="published-tech"><div><p>From the studio</p><h2>新發布的技術札記</h2></div><LivePublishedPosts category="tech" /></section>
     </main>
   );
 }

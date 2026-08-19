@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -69,4 +70,34 @@ test("技術文章頁呈現章節、程式碼與回到分類的連結", async ()
   assert.match(html, /Call Stack/);
   assert.match(html, /<pre><code>/);
   assert.match(html, /href="\/tech"[^>]*>← 回到技術成長/);
+});
+
+test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線", async () => {
+  const [topbar, postsRoute, auth] = await Promise.all([
+    readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/posts/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/studio-auth.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.doesNotMatch(topbar, /href="\/studio"/);
+  assert.match(postsRoute, /getStudioSessionFromRequest\(request\)/);
+  assert.match(postsRoute, /isSameOriginMutation\(request\)/);
+  assert.match(auth, /allowedEmails\.size >= 2/);
+  assert.match(auth, /SameSite=Strict/);
+  assert.match(auth, /HttpOnly/);
+});
+
+test("文章內容與照片採安全輸出及版本保存", async () => {
+  const [markdown, mediaRoute, migration] = await Promise.all([
+    readFile(new URL("../app/components/SafeMarkdown.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/media/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0000_nappy_blur.sql", import.meta.url), "utf8"),
+  ]);
+
+  assert.doesNotMatch(markdown, /dangerouslySetInnerHTML/);
+  assert.match(mediaRoute, /8 \* 1024 \* 1024/);
+  assert.match(mediaRoute, /output\(\{ format: "image\/webp"/);
+  assert.match(migration, /CREATE TABLE `posts`/);
+  assert.match(migration, /CREATE TABLE `post_revisions`/);
+  assert.match(migration, /CREATE TABLE `media_assets`/);
 });

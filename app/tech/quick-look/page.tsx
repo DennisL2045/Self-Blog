@@ -1,4 +1,5 @@
 import { TopBar } from "../../TopBar";
+import { LivePublishedPosts } from "../../components/LivePublishedPosts";
 import { quickTerms } from "../../content/tech";
 
 export default function QuickLookPage() {
@@ -17,6 +18,7 @@ export default function QuickLookPage() {
             </article>
           ))}
         </div>
+        <section className="published-quick"><div><p>More tools</p><h2>延伸名詞札記</h2></div><LivePublishedPosts category="quick-look" /></section>
       </section>
     </main>
   );
