@@ -1,8 +1,8 @@
 import Link from "next/link";
-import type { PostRecord } from "../lib/posts";
+import type { PublishedPostSummary } from "../lib/public-posts";
 import { categoryLabel, topicLabel } from "../lib/post-taxonomy";
 
-export function PublishedPostList({ posts, emptyText }: { posts: PostRecord[]; emptyText?: string }) {
+export function PublishedPostList({ posts, emptyText }: { posts: PublishedPostSummary[]; emptyText?: string }) {
   if (!posts.length) return emptyText ? <p className="published-empty">{emptyText}</p> : null;
   return (
     <div className="published-post-list">
@@ -10,7 +10,7 @@ export function PublishedPostList({ posts, emptyText }: { posts: PostRecord[]; e
         <article key={post.id}>
           <span>{String(index + 1).padStart(2, "0")}</span>
           <div><p>{categoryLabel(post.category)} · {topicLabel(post.topic)} · {formatDate(post.publishedAt ?? post.updatedAt)}</p><h2><Link href={`/notes/${post.slug}`}>{post.title}</Link></h2><div>{post.excerpt}</div></div>
-          <Link href={`/notes/${post.slug}`} aria-label={`閱讀${post.title}`}>↗</Link>
+          <Link className="published-post-link" href={`/notes/${post.slug}`} aria-label={`閱讀${post.title}`}>閱讀全文 <span aria-hidden="true">↗</span></Link>
         </article>
       ))}
     </div>

@@ -2,6 +2,8 @@ import { TopBar } from "../../TopBar";
 import { LivePublishedPosts } from "../../components/LivePublishedPosts";
 import { quickTerms } from "../../content/tech";
 
+export const dynamic = "force-dynamic";
+
 export default function QuickLookPage() {
   return (
     <main className="inner-page quick-page">

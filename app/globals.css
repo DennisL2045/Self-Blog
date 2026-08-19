@@ -171,6 +171,20 @@ footer { background:#171820; color:#8e8983; display:flex; justify-content:space-
 .markdown-table-wrap .align-right { text-align:right; }
 .markdown-table-wrap code { white-space:nowrap; }
 
+/* Public article discovery and reading details */
+.published-post-link { align-self:center; display:flex; align-items:center; gap:10px; color:#8f493f; font-size:.72rem !important; letter-spacing:.08em; white-space:nowrap; }
+.published-post-link span { font-size:1.15rem; }
+.published-reading { padding-top:70px; }
+.published-breadcrumb { display:flex; gap:10px; margin-bottom:52px; color:#857d76; font-size:.72rem; letter-spacing:.05em; }
+.published-breadcrumb a:hover { color:#9c4e42; }
+.published-reading-meta { display:flex; flex-wrap:wrap; gap:12px 24px; margin-top:25px; color:#8b8178; font-size:.7rem; letter-spacing:.08em; }
+.published-reading > header .published-reading-meta time { display:inline; margin:0; }
+.published-reading-meta span::before { content:"·"; margin-right:24px; }
+.published-reading > footer { gap:22px; flex-wrap:wrap; }
+.published-reading > footer span { margin-left:auto; }
+.studio-public-link { margin-left:10px; padding-left:16px; border-left:1px solid #4b4e58; color:#d29a79; }
+.studio-public-link:hover { color:#f0c4a8; }
+
 /* First real publishing workflow */
 .home-notes-state { margin:45px 0 0; padding:34px 0; border-top:1px solid rgba(32,31,38,.22); border-bottom:1px solid rgba(32,31,38,.22); color:#777069; text-align:center; }
 .studio-create-options { display:grid; gap:8px; }

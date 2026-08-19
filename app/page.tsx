@@ -2,6 +2,8 @@ import Link from "next/link";
 import { CatWindow } from "./CatWindow";
 import { HomeLatestNotes } from "./components/HomeLatestNotes";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <main>

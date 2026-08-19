@@ -1,37 +1,19 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import type { PostRecord } from "../lib/posts";
+import { listPublicPostSummaries } from "../lib/public-posts";
 import { topicLabel } from "../lib/post-taxonomy";
 
 type HomeNote = { date: string; tag: string; title: string; excerpt: string; href: string };
 
-export function HomeLatestNotes() {
-  const [notes, setNotes] = useState<HomeNote[] | null>(null);
+export async function HomeLatestNotes() {
+  const posts = await listPublicPostSummaries(undefined, 3);
+  const notes: HomeNote[] = posts.map((post) => ({
+    date: new Intl.DateTimeFormat("zh-TW", { month: "2-digit", day: "2-digit" }).format(new Date(post.publishedAt ?? post.updatedAt)),
+    tag: topicLabel(post.topic),
+    title: post.title,
+    excerpt: post.excerpt,
+    href: `/notes/${post.slug}`,
+  }));
 
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/posts", { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("request_failed");
-        return await response.json() as { posts?: PostRecord[] };
-      })
-      .then((data) => {
-        const live = (data.posts ?? []).slice(0, 3).map((post) => ({
-          date: new Intl.DateTimeFormat("zh-TW", { month: "2-digit", day: "2-digit" }).format(new Date(post.publishedAt ?? post.updatedAt)),
-          tag: topicLabel(post.topic),
-          title: post.title,
-          excerpt: post.excerpt,
-          href: `/notes/${post.slug}`,
-        }));
-        setNotes(live);
-      })
-      .catch(() => setNotes([]));
-    return () => controller.abort();
-  }, []);
-
-  if (notes === null) return <p className="home-notes-state">正在看看書架上有沒有新文章…</p>;
   if (!notes.length) return <p className="home-notes-state">第一篇文章準備中。發布後會從這裡開始累積。</p>;
 
   return <div className="note-list">{notes.map((note, index) => (

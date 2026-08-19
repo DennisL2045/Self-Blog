@@ -1,6 +1,8 @@
 import { TopBar } from "../TopBar";
 import { LivePublishedPosts } from "../components/LivePublishedPosts";
 
+export const dynamic = "force-dynamic";
+
 export default function ExperiencePage() {
   return (
     <main className="inner-page collection-page"><TopBar /><section className="inner-content">

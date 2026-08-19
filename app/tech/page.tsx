@@ -3,6 +3,8 @@ import { TopBar } from "../TopBar";
 import { LivePublishedPosts } from "../components/LivePublishedPosts";
 import { techCategories } from "../content/tech";
 
+export const dynamic = "force-dynamic";
+
 export default function TechPage() {
   return (
     <main className="inner-page tech-page">

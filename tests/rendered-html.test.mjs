@@ -122,6 +122,35 @@ test("Markdown 一般文字會保留作者輸入的單行換行", async () => {
   assert.doesNotMatch(markdown, /paragraph\.join\(" "\)/);
 });
 
+test("公開文章清單由伺服器輸出並提供清楚的閱讀頁入口", async () => {
+  const [livePosts, homeNotes, readingPage, studio] = await Promise.all([
+    readFile(new URL("../app/components/LivePublishedPosts.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/HomeLatestNotes.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/notes/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.doesNotMatch(livePosts, /"use client"/);
+  assert.match(livePosts, /listPublicPostSummaries\(category, 50\)/);
+  assert.doesNotMatch(homeNotes, /"use client"/);
+  assert.match(homeNotes, /listPublicPostSummaries\(undefined, 3\)/);
+  assert.match(readingPage, /published-breadcrumb/);
+  assert.match(readingPage, /readingMinutes\(post\.content\)/);
+  assert.match(readingPage, /alternates: \{ canonical: url \}/);
+  assert.match(studio, /查看公開文章/);
+});
+
+test("搜尋引擎可讀取公開網站規則與網站地圖", async () => {
+  const [robotsResponse, sitemapResponse] = await Promise.all([render("/robots.txt"), render("/sitemap.xml")]);
+  assert.equal(robotsResponse.status, 200);
+  assert.equal(sitemapResponse.status, 200);
+  const [robots, sitemap] = await Promise.all([robotsResponse.text(), sitemapResponse.text()]);
+  assert.match(robots, /Allow: \//);
+  assert.match(robots, /Disallow: \/studio/);
+  assert.match(robots, /Sitemap: https:\/\/night-notes-cat\.songming1111\.chatgpt\.site\/sitemap\.xml/);
+  assert.match(sitemap, /<loc>https:\/\/night-notes-cat\.songming1111\.chatgpt\.site\/notes<\/loc>/);
+  assert.doesNotMatch(sitemap, /\/studio/);
+});
+
 test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線", async () => {
   const [topbar, postsRoute, auth] = await Promise.all([
     readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),

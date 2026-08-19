@@ -272,7 +272,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
               )}
             </aside>
             <footer className="studio-actions">
-              <div><span className={`status-dot ${draft.status}`} />{statusLabel(draft.status)}{dirty ? " · 尚未儲存" : " · 已同步"}</div>
+              <div><span className={`status-dot ${draft.status}`} />{statusLabel(draft.status)}{dirty ? " · 尚未儲存" : " · 已同步"}{draft.status === "published" && !dirty ? <a className="studio-public-link" href={`/notes/${draft.slug}`} target="_blank" rel="noreferrer">查看公開文章 ↗</a> : null}</div>
               <div><button className="archive" onClick={archive} disabled={busy}>封存</button><button onClick={() => save("draft")} disabled={busy}>儲存草稿</button><button className="publish" onClick={() => save("published")} disabled={busy}>發布文章</button></div>
             </footer>
             {message && <p className="studio-message" role="status">{message}</p>}
