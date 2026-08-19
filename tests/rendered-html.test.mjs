@@ -97,6 +97,15 @@ test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線",
   assert.match(auth, /HttpOnly/);
 });
 
+test("Google 登入回呼使用可寫入 Cookie 的重新導向回應", async () => {
+  const sessionRoute = await readFile(new URL("../app/api/studio/session/route.ts", import.meta.url), "utf8");
+
+  assert.doesNotMatch(sessionRoute, /Response\.redirect/);
+  assert.match(sessionRoute, /new Response\(null, \{ status: 303, headers \}\)/);
+  assert.match(sessionRoute, /headers\.set\("Set-Cookie", cookie\)/);
+  assert.match(sessionRoute, /"Cache-Control": "no-store"/);
+});
+
 test("文章內容與照片採安全輸出及版本保存", async () => {
   const [markdown, mediaRoute, initialMigration, topicMigration] = await Promise.all([
     readFile(new URL("../app/components/SafeMarkdown.tsx", import.meta.url), "utf8"),

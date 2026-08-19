@@ -18,16 +18,21 @@ export async function POST(request: Request) {
 
     const identity = await verifyGoogleCredential(credential);
     const token = await createStudioSessionToken(identity);
-    const response = Response.redirect(new URL("/studio", request.url), 303);
-    response.headers.set("Set-Cookie", studioSessionCookie(request, token));
-    response.headers.set("Cache-Control", "no-store");
-    return response;
+    return studioRedirect(request, "/studio", studioSessionCookie(request, token));
   } catch (caught) {
     if (caught instanceof Error && caught.message === "account_not_allowed") error = "not-allowed";
     if (caught instanceof Error && caught.message === "studio_not_configured") error = "configuration";
+    console.error("[studio-session]", caught instanceof Error ? caught.message : "unknown_error");
   }
 
-  const response = Response.redirect(new URL(`/studio?error=${error}`, request.url), 303);
-  response.headers.set("Cache-Control", "no-store");
-  return response;
+  return studioRedirect(request, `/studio?error=${error}`);
+}
+
+function studioRedirect(request: Request, pathname: string, cookie?: string) {
+  const headers = new Headers({
+    Location: new URL(pathname, request.url).toString(),
+    "Cache-Control": "no-store",
+  });
+  if (cookie) headers.set("Set-Cookie", cookie);
+  return new Response(null, { status: 303, headers });
 }
