@@ -101,7 +101,7 @@ export function SafeMarkdown({ content, className = "safe-markdown" }: { content
         quote.push(lines[index].slice(2));
         index += 1;
       }
-      blocks.push(<blockquote key={`quote-${index}`}>{renderInline(quote.join(" "), `quote-${index}`)}</blockquote>);
+      blocks.push(<blockquote key={`quote-${index}`}>{renderInlineLines(quote, `quote-${index}`)}</blockquote>);
       continue;
     }
 
@@ -111,7 +111,7 @@ export function SafeMarkdown({ content, className = "safe-markdown" }: { content
       paragraph.push(lines[index]);
       index += 1;
     }
-    blocks.push(<p key={`p-${index}`}>{renderInline(paragraph.join(" "), `p-${index}`)}</p>);
+    blocks.push(<p key={`p-${index}`}>{renderInlineLines(paragraph, `p-${index}`)}</p>);
   }
 
   return <div className={className}>{blocks}</div>;
@@ -161,6 +161,13 @@ function tableAlignment(divider: string) {
   if (value.startsWith(":") && value.endsWith(":")) return "align-center";
   if (value.endsWith(":")) return "align-right";
   return "align-left";
+}
+
+function renderInlineLines(lines: string[], keyPrefix: string): ReactNode[] {
+  return lines.flatMap((line, lineIndex) => [
+    ...(lineIndex > 0 ? [<br key={`${keyPrefix}-break-${lineIndex}`} />] : []),
+    ...renderInline(line, `${keyPrefix}-line-${lineIndex}`),
+  ]);
 }
 
 function renderInline(text: string, keyPrefix: string): ReactNode[] {

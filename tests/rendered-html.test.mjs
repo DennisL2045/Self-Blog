@@ -114,6 +114,14 @@ test("Markdown 表格會顯示為可橫向捲動的資料表", async () => {
   assert.match(styles, /\.markdown-table-wrap table[^}]*border-collapse:collapse/);
 });
 
+test("Markdown 一般文字會保留作者輸入的單行換行", async () => {
+  const markdown = await readFile(new URL("../app/components/SafeMarkdown.tsx", import.meta.url), "utf8");
+  assert.match(markdown, /renderInlineLines\(paragraph/);
+  assert.match(markdown, /renderInlineLines\(quote/);
+  assert.match(markdown, /<br key=/);
+  assert.doesNotMatch(markdown, /paragraph\.join\(" "\)/);
+});
+
 test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線", async () => {
   const [topbar, postsRoute, auth] = await Promise.all([
     readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
