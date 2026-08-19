@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 
 export function TopBar() {
@@ -17,12 +18,13 @@ export function TopBar() {
 
   return (
     <header className="inner-topbar" onPointerMove={(event) => look(event.clientX, event.clientY)}>
-      <a className="inner-brand" href="/">夜行手札</a>
+      <Link className="inner-brand" href="/">夜行手札</Link>
       <nav className="inner-nav" aria-label="內頁選單">
-        <a href="/">首頁</a>
-        <a href="/articles">文章</a>
-        <a href="/about">關於</a>
-        <a href="mailto:hello@example.com">聯絡我</a>
+        <Link href="/tech">技術成長</Link>
+        <Link href="/experience">個人經歷</Link>
+        <Link href="/travel">出遊手札</Link>
+        <Link href="/about">關於</Link>
+        <Link href="/about#contact">聯絡我</Link>
       </nav>
       <div className="topbar-cat" ref={catRef} aria-label="趴在導覽列上的黑色大眼貓" role="img">
         <span className="topbar-tail" />

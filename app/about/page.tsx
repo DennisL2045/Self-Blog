@@ -5,13 +5,13 @@ export default function AboutPage() {
     <main className="inner-page">
       <TopBar />
       <section className="inner-content about-page">
-        <header className="inner-heading"><p>About</p><h1>關於這裡</h1><span>寫給夜裡還醒著，也願意慢下來的人。</span></header>
+        <header className="inner-heading"><p>About</p><h1>關於這裡</h1><span>整理技術理解，也收藏做過的事與走過的地方。</span></header>
         <div className="about-story">
           <span className="story-moon">☾</span>
           <div>
-            <p>夜行手札不追趕更新頻率，也不急著把每件事說清楚。</p>
-            <p>這裡收著散步時遇見的光、讀到一半的書、沒能寄出的信，還有深夜才慢慢浮上來的心情。希望你來到這裡時，可以像趴在窗台上的貓一樣，找到一個舒服的位置停留片刻。</p>
-            <a href="mailto:hello@example.com">寫一封信給我 <span>↗</span></a>
+            <p>夜行手札不追趕更新頻率，也不把理解壓縮成標準答案。</p>
+            <p>這裡會慢慢收進程式概念、專案經驗與旅途記錄。希望每篇內容都保留脈絡與實際使用情境，讓日後回來閱讀時，仍能接續當時的思考。</p>
+            <p id="contact"><strong>聯絡我</strong><br />公開聯絡信箱準備好後會放在這裡，不會使用範本或私人帳號代替。</p>
           </div>
         </div>
       </section>
