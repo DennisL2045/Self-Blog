@@ -29,7 +29,9 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [templateId, setTemplateId] = useState(editorTemplates[0]?.id ?? "");
+  const [previewMode, setPreviewMode] = useState<"preview" | "edit">("preview");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const directEditorRef = useRef<HTMLTextAreaElement>(null);
 
   function choose(post: PostRecord) {
     if (dirty && !window.confirm("目前修改尚未儲存，仍要切換文章嗎？")) return;
@@ -95,6 +97,11 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
     });
     setDirty(true);
     setMessage("範本已放入目前草稿；內容尚未儲存，也不會自動發布。" );
+  }
+
+  function changePreviewMode(mode: "preview" | "edit") {
+    setPreviewMode(mode);
+    if (mode === "edit") requestAnimationFrame(() => directEditorRef.current?.focus());
   }
 
   async function save(nextStatus?: PostStatus) {
@@ -225,7 +232,28 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
               </div>
               <label><span>內容</span><textarea ref={textareaRef} className="studio-content" value={draft.content} onChange={(event) => change("content", event.target.value)} placeholder="從這裡開始寫。可以使用上方工具加入標題、清單、程式碼和照片。" /></label>
             </div>
-            <aside className="studio-preview"><span>即時預覽</span><SafeMarkdown content={draft.content || "還沒有內容。"} /></aside>
+            <aside className="studio-preview">
+              <header className="studio-preview-header">
+                <div><span>{previewMode === "preview" ? "即時預覽" : "直接編輯"}</span><small>{previewMode === "preview" ? "查看文章發布後的閱讀排版" : "內容會和左側文字框即時同步"}</small></div>
+                <div className="studio-preview-switch" role="group" aria-label="右側工作區模式">
+                  <button type="button" className={previewMode === "preview" ? "active" : ""} aria-pressed={previewMode === "preview"} onClick={() => changePreviewMode("preview")}>預覽</button>
+                  <button type="button" className={previewMode === "edit" ? "active" : ""} aria-pressed={previewMode === "edit"} onClick={() => changePreviewMode("edit")}>直接編輯</button>
+                </div>
+              </header>
+              {previewMode === "preview" ? (
+                <div className="studio-preview-body"><SafeMarkdown content={draft.content || "還沒有內容。"} /></div>
+              ) : (
+                <textarea
+                  ref={directEditorRef}
+                  className="studio-direct-editor"
+                  value={draft.content}
+                  onChange={(event) => change("content", event.target.value)}
+                  placeholder="可以直接在右側修改文章內容。Markdown 標題、清單與程式碼標記會完整保留。"
+                  aria-label="直接編輯文章內容"
+                  spellCheck
+                />
+              )}
+            </aside>
             <footer className="studio-actions">
               <div><span className={`status-dot ${draft.status}`} />{statusLabel(draft.status)}{dirty ? " · 尚未儲存" : " · 已同步"}</div>
               <div><button className="archive" onClick={archive} disabled={busy}>封存</button><button onClick={() => save("draft")} disabled={busy}>儲存草稿</button><button className="publish" onClick={() => save("published")} disabled={busy}>發布文章</button></div>

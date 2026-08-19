@@ -82,6 +82,21 @@ test("第一篇 JavaScript 寫作範本包含分類、主題與程式碼示範",
   assert.match(codeBlock, /複製程式碼/);
 });
 
+test("編輯室右側可直接改文並使用獨立滾動區", async () => {
+  const [editor, styles] = await Promise.all([
+    readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(editor, />直接編輯</);
+  assert.match(editor, /className="studio-direct-editor"/);
+  assert.match(editor, /onChange=\{\(event\) => change\("content", event\.target\.value\)\}/);
+  assert.match(styles, /\.studio-preview-body[^}]*overflow-y:auto/);
+  assert.match(styles, /\.studio-direct-editor[^}]*overflow-y:auto/);
+  assert.match(styles, /\.studio-layout \{ height:calc\(100svh - 86px\)/);
+  assert.match(styles, /overscroll-behavior:contain/);
+});
+
 test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線", async () => {
   const [topbar, postsRoute, auth] = await Promise.all([
     readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
