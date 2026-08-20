@@ -225,6 +225,7 @@ test("首頁與內頁黑貓維持自然趴姿、全黑耳朵與柔和尾巴", as
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
   assert.match(catWindow, /className="cat-tail"/);
+  assert.match(catWindow, /className="cat-tail-tip"/);
   assert.match(catWindow, /className="paw paw-left"/);
   assert.match(topbar, /className="topbar-tail"/);
   assert.match(styles, /\.ear::after \{ display:none; \}/);
@@ -235,11 +236,13 @@ test("首頁與內頁黑貓維持自然趴姿、全黑耳朵與柔和尾巴", as
   assert.match(styles, /\.cat-head \{[^}]*left: 16px; top: 48px/);
   assert.match(styles, /\.paw \{[^}]*z-index:4[^}]*width:88px; height:40px/);
   assert.match(styles, /\.paw-left \{ z-index:5; left:94px; transform:rotate\(7deg\); \} \.paw-right \{ left:147px/);
-  assert.match(styles, /\.cat-tail \{[^}]*right:28px; top:128px; width:102px; height:172px[^}]*border-right:27px solid #08080a[^}]*border-bottom:27px solid #08080a[^}]*border-bottom-right-radius:78px 72px[^}]*border-bottom-left-radius:52px 25px[^}]*animation:cat-tail-rest/);
-  assert.match(styles, /@keyframes cat-tail-rest \{ 0%,100% \{ transform:rotate\(7\.5deg\); \} 50% \{ transform:rotate\(9\.5deg\); \} \}/);
+  assert.match(styles, /\.cat-tail \{[^}]*right:28px; top:128px; width:29px; height:108px[^}]*border-radius:999px[^}]*transform:rotate\(7\.5deg\)/);
+  assert.doesNotMatch(styles, /\.cat-tail \{[^}]*animation:/);
+  assert.match(styles, /\.cat-tail-tip \{[^}]*right:0; top:72px; width:102px; height:100px[^}]*border-right:27px solid #08080a[^}]*border-bottom:27px solid #08080a[^}]*transform-origin:calc\(100% - 14px\) 8px[^}]*animation:cat-tail-tip-rest/);
+  assert.match(styles, /@keyframes cat-tail-tip-rest \{ 0%,100% \{ transform:rotate\(0deg\); \} 50% \{ transform:rotate\(2\.4deg\); \} \}/);
   assert.doesNotMatch(styles, /\.cat-tail::before|\.cat-tail::after/);
   assert.match(styles, /\.topbar-tail \{[^}]*animation:topbar-tail-rest/);
-  assert.match(styles, /prefers-reduced-motion:[^)]+\)[\s\S]*?\.cat-body, \.cat-head, \.cat-tail, \.topbar-tail \{ animation:none; \}/);
+  assert.match(styles, /prefers-reduced-motion:[^)]+\)[\s\S]*?\.cat-body, \.cat-head, \.cat-tail-tip, \.topbar-tail \{ animation:none; \}/);
 });
 
 test("所有三區塊標題統一為標題在上、標示與說明在下", async () => {

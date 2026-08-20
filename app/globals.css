@@ -52,11 +52,12 @@ nav a:hover::after, nav a:focus-visible::after { right: 0; }
 .paw::before, .paw::after { content:""; position:absolute; bottom:8px; height:11px; border-left:1px solid #1d1c21; }
 .paw::before { left:34px; } .paw::after { left:59px; }
 .paw-left { z-index:5; left:94px; transform:rotate(7deg); } .paw-right { left:147px; right:auto; transform:rotate(-7deg); }
-.cat-tail { position:absolute; z-index:0; right:28px; top:128px; width:102px; height:172px; border-right:27px solid #08080a; border-bottom:27px solid #08080a; border-bottom-right-radius:78px 72px; border-bottom-left-radius:52px 25px; background:transparent; transform-origin:90% 4%; animation:cat-tail-rest 5.6s ease-in-out infinite; }
+.cat-tail { position:absolute; z-index:0; right:28px; top:128px; width:29px; height:108px; border-radius:999px; background:#08080a; box-shadow:inset -5px 0 #060608; transform:rotate(7.5deg); transform-origin:50% 10%; }
+.cat-tail-tip { position:absolute; right:0; top:72px; width:102px; height:100px; border-right:27px solid #08080a; border-bottom:27px solid #08080a; border-bottom-right-radius:78px 72px; border-bottom-left-radius:52px 25px; background:transparent; transform-origin:calc(100% - 14px) 8px; animation:cat-tail-tip-rest 5.6s ease-in-out infinite; }
 
 @keyframes cat-breathe { 0%,100% { transform:scaleY(1); } 50% { transform:scaleY(1.018); } }
 @keyframes cat-head-rest { 0%,100% { transform:translateY(0) rotate(-1deg); } 50% { transform:translateY(1px) rotate(-.3deg); } }
-@keyframes cat-tail-rest { 0%,100% { transform:rotate(7.5deg); } 50% { transform:rotate(9.5deg); } }
+@keyframes cat-tail-tip-rest { 0%,100% { transform:rotate(0deg); } 50% { transform:rotate(2.4deg); } }
 
 .hero-copy { padding: clamp(46px, 6vw, 76px) clamp(34px, 4vw, 60px); display:flex; flex-direction:column; justify-content:center; background: #a95648; color:#f5ecdd; position:relative; }
 .hero-copy::before { content:""; position:absolute; top:44px; right:42px; width:55px; height:55px; border-top:1px solid rgba(255,255,255,.35); border-right:1px solid rgba(255,255,255,.35); }
@@ -162,7 +163,7 @@ footer { background:#171820; color:#8e8983; display:flex; justify-content:space-
   .inner-topbar { height:82px; padding:0 18px; }.inner-brand { font-size:.96rem; }.inner-nav { padding-right:76px; gap:15px; }.inner-nav a { display:none; }.inner-nav a:first-child { display:block; }.topbar-cat { right:12px; transform:scale(.78); transform-origin:bottom right; }.inner-content { width:calc(100% - 36px); padding:62px 0 90px; }.inner-heading { grid-template-columns:1fr; gap:18px; }.article-index article { grid-template-columns:32px 1fr; gap:15px; }.article-index article > a, .article-index article div > span { display:none; }.about-story { grid-template-columns:1fr; gap:24px; }.story-moon { font-size:4.5rem; }
   .home-portals { padding:20px 18px 80px; }.portal-heading, .tech-hero { grid-template-columns:1fr; gap:16px; }.portal-heading p, .tech-hero > p { grid-column:auto; }.portal-grid { grid-template-columns:1fr; }.portal-grid a { min-height:210px; border-right:0; border-bottom:1px solid rgba(32,31,38,.22); }.tech-hero, .tech-category-grid, .tech-library, .tech-reading { width:calc(100% - 36px); }.tech-hero { padding:70px 0 50px; }.tech-hero h1 { font-size:3rem; white-space:normal; }.tech-category-grid { grid-template-columns:1fr; }.tech-category-card, .quick-look-entry { min-height:285px; }.tech-library { padding:80px 0 95px; }.tech-library-head { grid-template-columns:1fr; }.tech-search { justify-self:start; }.tech-filters { overflow-x:auto; }.tech-filters button { white-space:nowrap; }.tech-article-grid, .term-grid { grid-template-columns:1fr; }.tech-card, .term-grid article { min-height:300px; }.quick-intro { grid-template-columns:1fr; }.tech-reading { padding-top:65px; }.tech-reading > header { text-align:left; }.tech-reading > header ul { justify-content:flex-start; }.reading-body { margin-top:55px; }.reading-body aside { grid-template-columns:1fr; }.reading-body aside span { grid-column:auto; }.reading-sections p { font-size:.94rem; }.code-block { margin-left:-9px; margin-right:-9px; }.collection-placeholder { grid-template-columns:1fr; padding:32px; }.collection-placeholder > span { font-size:3rem; }
 }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .eye i { transition:none; } .cat-body, .cat-head, .cat-tail, .topbar-tail { animation:none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .eye i { transition:none; } .cat-body, .cat-head, .cat-tail-tip, .topbar-tail { animation:none; } }
 
 /* Published Markdown code panels */
 .markdown-code { overflow:hidden; }

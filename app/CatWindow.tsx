@@ -32,7 +32,9 @@ export function CatWindow() {
       <div className="cloud cloud-a" /><div className="cloud cloud-b" />
       <div className="window-frame vertical" /><div className="window-frame horizontal" />
       <div className="cat">
-        <div className="cat-tail" />
+        <div className="cat-tail">
+          <span className="cat-tail-tip" />
+        </div>
         <div className="cat-body" />
         <div className="cat-head">
           <span className="ear left" /><span className="ear right" />
