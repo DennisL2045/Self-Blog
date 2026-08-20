@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { TechArticle, TechCategory } from "../content/tech";
 
@@ -32,7 +31,7 @@ export function TechExplorer({ categories, articles }: { categories: TechCategor
           <article className="tech-card" key={article.slug}>
             <span className="tech-card-number">0{index + 1}</span>
             <p>{article.categoryName} · {article.level}</p>
-            <h3><Link href={`/tech/${article.slug}`}>{article.title}</Link></h3>
+            <h3><a href={`/tech/${article.slug}`}>{article.title}</a></h3>
             <span>{article.summary}</span>
             <div>{article.tags.map((tag) => <small key={tag}>#{tag}</small>)}</div>
           </article>

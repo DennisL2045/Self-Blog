@@ -35,6 +35,7 @@ test("首頁呈現四個清楚的內容入口", async () => {
 
   assert.match(html, /<title>夜行手記｜寫給還醒著的人<\/title>/);
   assert.match(html, /href="\/tech"[^>]*>技術成長/);
+  assert.match(html, /href="\/articles"[^>]*>文章總覽/);
   assert.match(html, /href="\/tech\/quick-look"/);
   assert.match(html, />簡單看看</);
   assert.match(html, /href="\/experience"/);
@@ -143,6 +144,36 @@ test("公開文章清單由伺服器輸出並以完整頁面連結開啟文章",
   assert.match(studio, /查看公開文章/);
 });
 
+test("文章總覽與四個系列頁形成完整導覽", async () => {
+  const [articlesHtml, legacyNotesHtml, seriesNav] = await Promise.all([
+    renderHtml("/articles"),
+    renderHtml("/notes"),
+    readFile(new URL("../app/components/SeriesNav.tsx", import.meta.url), "utf8"),
+  ]);
+  for (const html of [articlesHtml, legacyNotesHtml]) {
+    assert.match(html, />文章總覽</);
+    assert.match(html, /href="\/tech"/);
+    assert.match(html, /href="\/tech\/quick-look"/);
+    assert.match(html, /href="\/experience"/);
+    assert.match(html, /href="\/travel"/);
+  }
+  assert.match(seriesNav, /aria-current=\{item\.key === current \? "page"/);
+  assert.match(seriesNav, /aria-label="文章系列"/);
+});
+
+test("公開頁面一律使用可完整載入的站內超連結", async () => {
+  const [home, topbar, reading, techReading] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/notes/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
+  ]);
+  for (const source of [home, topbar, reading, techReading]) assert.doesNotMatch(source, /from "next\/link"|<Link/);
+  assert.match(topbar, /<a className="inner-brand" href="\/">/);
+  assert.match(reading, /<a href="\/">返回首頁<\/a>/);
+  assert.match(reading, /<a href="\/articles">查看文章總覽<\/a>/);
+});
+
 test("搜尋引擎可讀取公開網站規則與網站地圖", async () => {
   const [robotsResponse, sitemapResponse] = await Promise.all([render("/robots.txt"), render("/sitemap.xml")]);
   assert.equal(robotsResponse.status, 200);
@@ -151,7 +182,7 @@ test("搜尋引擎可讀取公開網站規則與網站地圖", async () => {
   assert.match(robots, /Allow: \//);
   assert.match(robots, /Disallow: \/studio/);
   assert.match(robots, /Sitemap: https:\/\/night-notes-cat\.songming1111\.chatgpt\.site\/sitemap\.xml/);
-  assert.match(sitemap, /<loc>https:\/\/night-notes-cat\.songming1111\.chatgpt\.site\/notes<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/night-notes-cat\.songming1111\.chatgpt\.site\/articles<\/loc>/);
   assert.doesNotMatch(sitemap, /\/studio/);
 });
 

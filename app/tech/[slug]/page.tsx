@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { TopBar } from "../../TopBar";
 import { getTechArticle, techArticles } from "../../content/tech";
 
@@ -14,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function TechArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const article = getTechArticle((await params).slug);
-  if (!article) return <main className="inner-page"><TopBar /><section className="article-missing"><p>這篇札記暫時不在書架上。</p><Link href="/tech">回到技術成長</Link></section></main>;
+  if (!article) return <main className="inner-page"><TopBar /><section className="article-missing"><p>這篇札記暫時不在書架上。</p><a href="/tech">回到技術成長</a></section></main>;
 
   return (
     <main className="inner-page tech-reading-page">
@@ -39,7 +38,7 @@ export default async function TechArticlePage({ params }: { params: Promise<{ sl
             ))}
           </div>
         </div>
-        <footer className="reading-footer"><Link href="/tech">← 回到技術成長</Link><span>理解不必一次完成，留下能繼續追問的地方。</span></footer>
+        <footer className="reading-footer"><a href="/tech">← 回到技術成長</a><a href="/articles">文章總覽</a><a href="/">返回首頁</a><span>理解不必一次完成，留下能繼續追問的地方。</span></footer>
       </article>
     </main>
   );

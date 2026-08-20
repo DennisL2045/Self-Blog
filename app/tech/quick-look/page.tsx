@@ -1,5 +1,6 @@
 import { TopBar } from "../../TopBar";
 import { LivePublishedPosts } from "../../components/LivePublishedPosts";
+import { SeriesNav } from "../../components/SeriesNav";
 import { quickTerms } from "../../content/tech";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +11,7 @@ export default function QuickLookPage() {
       <TopBar />
       <section className="inner-content">
         <header className="inner-heading"><p>Quick glossary</p><h1>簡單看看</h1><span>遇到陌生工具時，不急著鑽進所有細節；先知道它解決什麼問題，以及通常在哪裡出現。</span></header>
+        <SeriesNav current="quick-look" />
         <div className="quick-intro"><strong>怎麼使用這一區？</strong><p>這裡是技術地圖的入口，不取代完整文件。名詞熟悉後，再前往對應的技術札記理解原理、限制與實作方式。</p></div>
         <div className="term-grid">
           {quickTerms.map((term, index) => (

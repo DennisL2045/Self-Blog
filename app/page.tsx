@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { CatWindow } from "./CatWindow";
 import { HomeLatestNotes } from "./components/HomeLatestNotes";
 
@@ -12,11 +11,11 @@ export default function Home() {
           夜行手記 <span>after dusk</span>
         </a>
         <nav aria-label="主要選單">
-          <Link href="/tech">技術成長</Link>
-          <Link href="/experience">個人經歷</Link>
-          <Link href="/travel">出遊手札</Link>
-          <Link href="/notes">所有札記</Link>
-          <Link href="/about">關於</Link>
+          <a href="/articles">文章總覽</a>
+          <a href="/tech">技術成長</a>
+          <a href="/experience">個人經歷</a>
+          <a href="/travel">出遊手札</a>
+          <a href="/about">關於</a>
         </nav>
       </header>
 
@@ -33,10 +32,10 @@ export default function Home() {
       <section className="home-portals" aria-labelledby="portal-title">
         <div className="portal-heading"><p>Four shelves</p><h2 id="portal-title">從哪一頁開始？</h2><span>技術與生活分開整理，需要時仍能在同一個地方找到。</span></div>
         <div className="portal-grid">
-          <Link href="/tech"><span>01</span><p>Knowledge</p><h3>技術成長</h3><div>概念、原理、範例與實務取捨。</div></Link>
-          <Link href="/tech/quick-look"><span>02</span><p>Quick glossary</p><h3>簡單看看</h3><div>常見工具名詞與大概使用情境。</div></Link>
-          <Link href="/experience"><span>03</span><p>Experience</p><h3>個人經歷</h3><div>專案、學習歷程與成長轉折。</div></Link>
-          <Link href="/travel"><span>04</span><p>Travel</p><h3>出遊手札</h3><div>地點、照片與旅途裡的小事。</div></Link>
+          <a href="/tech"><span>01</span><p>Knowledge</p><h3>技術成長</h3><div>概念、原理、範例與實務取捨。</div></a>
+          <a href="/tech/quick-look"><span>02</span><p>Quick glossary</p><h3>簡單看看</h3><div>常見工具名詞與大概使用情境。</div></a>
+          <a href="/experience"><span>03</span><p>Experience</p><h3>個人經歷</h3><div>專案、學習歷程與成長轉折。</div></a>
+          <a href="/travel"><span>04</span><p>Travel</p><h3>出遊手札</h3><div>地點、照片與旅途裡的小事。</div></a>
         </div>
       </section>
 

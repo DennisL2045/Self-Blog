@@ -4,7 +4,7 @@ import { siteUrl } from "./lib/site";
 
 export const dynamic = "force-dynamic";
 
-const publicRoutes = ["", "/tech", "/tech/quick-look", "/experience", "/travel", "/notes", "/about"];
+const publicRoutes = ["", "/articles", "/tech", "/tech/quick-look", "/experience", "/travel", "/about"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await listPublicPostSummaries(undefined, 500);

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TopBar } from "../../TopBar";
 import { SafeMarkdown } from "../../components/SafeMarkdown";
@@ -45,7 +44,7 @@ export default async function PublishedNotePage({ params }: { params: Promise<{ 
     <main className="inner-page published-reading-page">
       <TopBar />
       <article className="published-reading">
-        <nav className="published-breadcrumb" aria-label="文章路徑"><Link href="/">首頁</Link><span>/</span><Link href={categoryHref(post.category)}>{categoryLabel(post.category)}</Link></nav>
+        <nav className="published-breadcrumb" aria-label="文章路徑"><a href="/">首頁</a><span>/</span><a href="/articles">文章總覽</a><span>/</span><a href={categoryHref(post.category)}>{categoryLabel(post.category)}</a></nav>
         <header>
           <p>{categoryLabel(post.category)} · {topicLabel(post.topic)}</p>
           <h1>{post.title}</h1>
@@ -53,7 +52,7 @@ export default async function PublishedNotePage({ params }: { params: Promise<{ 
           <section className="published-reading-meta" aria-label="文章資訊"><time dateTime={post.publishedAt ?? post.updatedAt}>{formatDate(post.publishedAt ?? post.updatedAt)}</time><span>約 {readingMinutes(post.content)} 分鐘閱讀</span></section>
         </header>
         <SafeMarkdown content={post.content} />
-        <footer><Link href={categoryHref(post.category)}>← 回到{categoryLabel(post.category)}</Link><Link href="/notes">查看所有札記</Link><span>夜行手札 · slowly documented</span></footer>
+        <footer><a href={categoryHref(post.category)}>← 回到{categoryLabel(post.category)}</a><a href="/articles">查看文章總覽</a><a href="/">返回首頁</a><span>夜行手札 · slowly documented</span></footer>
       </article>
     </main>
   );
@@ -75,5 +74,5 @@ function categoryHref(category: string) {
   if (category === "quick-look") return "/tech/quick-look";
   if (category === "experience") return "/experience";
   if (category === "travel") return "/travel";
-  return "/notes";
+  return "/articles";
 }
