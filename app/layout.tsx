@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-Hant">
+      <head><link rel="preload" href="/fonts/jf-openhuninn-2.1.ttf" as="font" type="font/ttf" crossOrigin="anonymous" /></head>
       <body>{children}</body>
     </html>
   );

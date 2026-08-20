@@ -9,6 +9,7 @@ export const posts = sqliteTable(
     excerpt: text("excerpt").notNull().default(""),
     content: text("content").notNull().default(""),
     category: text("category").notNull().default("tech"),
+    techCollection: text("tech_collection"),
     topic: text("topic").notNull().default("javascript"),
     status: text("status").notNull().default("draft"),
     authorGoogleSub: text("author_google_sub").notNull(),
@@ -21,6 +22,7 @@ export const posts = sqliteTable(
     uniqueIndex("idx_posts_slug_unique").on(table.slug),
     index("idx_posts_status_published_at").on(table.status, table.publishedAt),
     index("idx_posts_category_status_published_at").on(table.category, table.status, table.publishedAt),
+    index("idx_posts_tech_collection_status_published_at").on(table.techCollection, table.status, table.publishedAt),
   ],
 );
 
@@ -33,6 +35,7 @@ export const postRevisions = sqliteTable(
     excerpt: text("excerpt").notNull(),
     content: text("content").notNull(),
     category: text("category").notNull(),
+    techCollection: text("tech_collection"),
     topic: text("topic").notNull().default("javascript"),
     status: text("status").notNull(),
     createdByGoogleSub: text("created_by_google_sub").notNull(),

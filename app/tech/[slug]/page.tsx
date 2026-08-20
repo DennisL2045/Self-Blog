@@ -1,18 +1,44 @@
 import type { Metadata } from "next";
 import { TopBar } from "../../TopBar";
-import { getTechArticle, techArticles } from "../../content/tech";
+import { LivePublishedPosts } from "../../components/LivePublishedPosts";
+import { SeriesNav } from "../../components/SeriesNav";
+import { getTechArticle, getTechCategory, techArticles, techCategories } from "../../content/tech";
+
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
-  return techArticles.map((article) => ({ slug: article.slug }));
+  return [...techCategories.map((category) => ({ slug: category.slug })), ...techArticles.map((article) => ({ slug: article.slug }))];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const article = getTechArticle((await params).slug);
+  const slug = (await params).slug;
+  const category = getTechCategory(slug);
+  if (category) return { title: `${category.name}｜技術成長｜夜行手札`, description: category.summary, alternates: { canonical: `/tech/${category.slug}` } };
+  const article = getTechArticle(slug);
   return article ? { title: `${article.title}｜夜行手札`, description: article.summary } : { title: "找不到札記｜夜行手札" };
 }
 
 export default async function TechArticlePage({ params }: { params: Promise<{ slug: string }> }) {
-  const article = getTechArticle((await params).slug);
+  const slug = (await params).slug;
+  const category = getTechCategory(slug);
+  if (category) {
+    return (
+      <main className="inner-page tech-page tech-collection-page">
+        <TopBar />
+        <section className="inner-content">
+          <header className="inner-heading"><p>{category.english}</p><h1>{category.name}</h1><span>{category.summary}</span></header>
+          <SeriesNav current="tech" />
+          <section className="collection-article-list" aria-labelledby="collection-articles-title">
+            <div><p>Filed notes</p><h2 id="collection-articles-title">{category.name}文章</h2><span>{category.topics.join("、")}</span></div>
+            <LivePublishedPosts category="tech" techCollection={category.slug} emptyText={`「${category.name}」目前還沒有公開文章。`} />
+          </section>
+          <footer className="collection-footer"><a href="/tech">← 回到全部技術分類</a><a href="/articles">文章總覽</a><a href="/">返回首頁</a></footer>
+        </section>
+      </main>
+    );
+  }
+
+  const article = getTechArticle(slug);
   if (!article) return <main className="inner-page"><TopBar /><section className="article-missing"><p>這篇札記暫時不在書架上。</p><a href="/tech">回到技術成長</a></section></main>;
 
   return (

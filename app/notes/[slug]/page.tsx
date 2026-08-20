@@ -4,6 +4,7 @@ import { TopBar } from "../../TopBar";
 import { SafeMarkdown } from "../../components/SafeMarkdown";
 import { getPublishedPostBySlug } from "../../lib/posts";
 import { categoryLabel, topicLabel } from "../../lib/post-taxonomy";
+import { techCollectionLabel } from "../../content/tech";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         description: post.excerpt,
         publishedTime: post.publishedAt ?? post.createdAt,
         modifiedTime: post.updatedAt,
-        tags: [categoryLabel(post.category), topicLabel(post.topic)],
+        tags: [categoryLabel(post.category), ...(post.techCollection ? [techCollectionLabel(post.techCollection)] : []), topicLabel(post.topic)],
       },
     };
   } catch {
@@ -44,15 +45,15 @@ export default async function PublishedNotePage({ params }: { params: Promise<{ 
     <main className="inner-page published-reading-page">
       <TopBar />
       <article className="published-reading">
-        <nav className="published-breadcrumb" aria-label="文章路徑"><a href="/">首頁</a><span>/</span><a href="/articles">文章總覽</a><span>/</span><a href={categoryHref(post.category)}>{categoryLabel(post.category)}</a></nav>
+        <nav className="published-breadcrumb" aria-label="文章路徑"><a href="/">首頁</a><span>/</span><a href="/articles">文章總覽</a><span>/</span><a href={categoryHref(post.category)}>{categoryLabel(post.category)}</a>{post.techCollection ? <><span>/</span><a href={`/tech/${post.techCollection}`}>{techCollectionLabel(post.techCollection)}</a></> : null}</nav>
         <header>
-          <p>{categoryLabel(post.category)} · {topicLabel(post.topic)}</p>
+          <p>{categoryLabel(post.category)}{post.techCollection ? ` · ${techCollectionLabel(post.techCollection)}` : ""} · {topicLabel(post.topic)}</p>
           <h1>{post.title}</h1>
           <div>{post.excerpt}</div>
           <section className="published-reading-meta" aria-label="文章資訊"><time dateTime={post.publishedAt ?? post.updatedAt}>{formatDate(post.publishedAt ?? post.updatedAt)}</time><span>約 {readingMinutes(post.content)} 分鐘閱讀</span></section>
         </header>
         <SafeMarkdown content={post.content} />
-        <footer><a href={categoryHref(post.category)}>← 回到{categoryLabel(post.category)}</a><a href="/articles">查看文章總覽</a><a href="/">返回首頁</a><span>夜行手札 · slowly documented</span></footer>
+        <footer><a href={post.techCollection ? `/tech/${post.techCollection}` : categoryHref(post.category)}>← 回到{post.techCollection ? techCollectionLabel(post.techCollection) : categoryLabel(post.category)}</a><a href="/articles">查看文章總覽</a><a href="/">返回首頁</a><span>夜行手札 · slowly documented</span></footer>
       </article>
     </main>
   );

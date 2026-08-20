@@ -17,13 +17,14 @@ export default function TechPage() {
       <SeriesNav current="tech" />
       <section className="tech-category-grid" aria-label="技術分類">
         {techCategories.map((category, index) => (
-          <article key={category.slug}>
+          <a className="tech-category-card" href={`/tech/${category.slug}`} key={category.slug}>
             <span>0{index + 1}</span>
             <p>{category.english}</p>
             <h2>{category.name}</h2>
             <div>{category.summary}</div>
             <ul>{category.topics.map((topic) => <li key={topic}>{topic}</li>)}</ul>
-          </article>
+            <b>查看分類文章 →</b>
+          </a>
         ))}
         <a className="quick-look-entry" href="/tech/quick-look">
           <span>07</span><p>Quick glossary</p><h2>簡單看看</h2>

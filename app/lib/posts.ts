@@ -1,6 +1,11 @@
 import { getD1 } from "./runtime";
 import type { StudioSession } from "./studio-auth";
 import {
+  defaultTechCollectionForTopic,
+  techCollections,
+  type TechCollection,
+} from "../content/tech";
+import {
   defaultTopicForCategory,
   postCategories,
   postTopics,
@@ -13,6 +18,7 @@ export const postStatuses = ["draft", "published", "archived"] as const;
 
 export { postCategories, postTopics } from "./post-taxonomy";
 export type { PostCategory, PostTopic } from "./post-taxonomy";
+export type { TechCollection } from "../content/tech";
 export type PostStatus = (typeof postStatuses)[number];
 
 export type PostRecord = {
@@ -22,6 +28,7 @@ export type PostRecord = {
   excerpt: string;
   content: string;
   category: PostCategory;
+  techCollection: TechCollection | null;
   topic: PostTopic;
   status: PostStatus;
   authorGoogleSub: string;
@@ -38,6 +45,7 @@ type PostRow = {
   excerpt: string;
   content: string;
   category: string;
+  tech_collection: string | null;
   topic: string;
   status: string;
   author_google_sub: string;
@@ -53,12 +61,13 @@ export type PostInput = {
   excerpt: string;
   content: string;
   category: PostCategory;
+  techCollection: TechCollection | null;
   topic: PostTopic;
   status: PostStatus;
 };
 
 const SELECT_COLUMNS = `
-  id, slug, title, excerpt, content, category, topic, status,
+  id, slug, title, excerpt, content, category, tech_collection, topic, status,
   author_google_sub, author_email, published_at, created_at, updated_at
 `;
 
@@ -70,6 +79,9 @@ function toPost(row: PostRow): PostRecord {
     excerpt: row.excerpt,
     content: row.content,
     category: row.category as PostCategory,
+    techCollection: techCollections.includes(row.tech_collection as TechCollection)
+      ? row.tech_collection as TechCollection
+      : row.category === "tech" ? defaultTechCollectionForTopic(row.topic) : null,
     topic: row.topic as PostTopic,
     status: row.status as PostStatus,
     authorGoogleSub: row.author_google_sub,
@@ -87,18 +99,20 @@ export async function listStudioPosts(): Promise<PostRecord[]> {
   return result.results.map(toPost);
 }
 
-export async function listPublishedPosts(category?: PostCategory, limit = 30): Promise<PostRecord[]> {
+export async function listPublishedPosts(category?: PostCategory, limit = 30, techCollection?: TechCollection): Promise<PostRecord[]> {
   const database = getD1();
-  const statement = category
+  const statement = category === "tech" && techCollection
+    ? database.prepare(`SELECT ${SELECT_COLUMNS} FROM posts WHERE status = 'published' AND category = 'tech' AND tech_collection = ? ORDER BY published_at DESC LIMIT ?`).bind(techCollection, limit)
+    : category
     ? database.prepare(`SELECT ${SELECT_COLUMNS} FROM posts WHERE status = 'published' AND category = ? ORDER BY published_at DESC LIMIT ?`).bind(category, limit)
     : database.prepare(`SELECT ${SELECT_COLUMNS} FROM posts WHERE status = 'published' ORDER BY published_at DESC LIMIT ?`).bind(limit);
   const result = await statement.all<PostRow>();
   return result.results.map(toPost);
 }
 
-export async function safeListPublishedPosts(category?: PostCategory, limit = 30): Promise<PostRecord[]> {
+export async function safeListPublishedPosts(category?: PostCategory, limit = 30, techCollection?: TechCollection): Promise<PostRecord[]> {
   try {
-    return await listPublishedPosts(category, limit);
+    return await listPublishedPosts(category, limit, techCollection);
   } catch {
     return [];
   }
@@ -120,9 +134,9 @@ export async function createPost(input: PostInput, session: StudioSession): Prom
   await database
     .prepare(`
       INSERT INTO posts (
-        id, slug, title, excerpt, content, category, topic, status,
+        id, slug, title, excerpt, content, category, tech_collection, topic, status,
         author_google_sub, author_email, published_at, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .bind(
       id,
@@ -131,6 +145,7 @@ export async function createPost(input: PostInput, session: StudioSession): Prom
       input.excerpt,
       input.content,
       input.category,
+      input.techCollection,
       input.topic,
       input.status,
       session.googleSub,
@@ -153,15 +168,16 @@ export async function updatePost(id: string, input: PostInput, session: StudioSe
   await database.batch([
     database.prepare(`
       INSERT INTO post_revisions (
-        post_id, title, excerpt, content, category, topic, status,
+        post_id, title, excerpt, content, category, tech_collection, topic, status,
         created_by_google_sub, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       current.id,
       current.title,
       current.excerpt,
       current.content,
       current.category,
+      current.techCollection,
       current.topic,
       current.status,
       session.googleSub,
@@ -169,7 +185,7 @@ export async function updatePost(id: string, input: PostInput, session: StudioSe
     ),
     database.prepare(`
       UPDATE posts SET
-        slug = ?, title = ?, excerpt = ?, content = ?, category = ?, topic = ?, status = ?,
+        slug = ?, title = ?, excerpt = ?, content = ?, category = ?, tech_collection = ?, topic = ?, status = ?,
         author_google_sub = ?, author_email = ?, published_at = ?, updated_at = ?
       WHERE id = ?
     `).bind(
@@ -178,6 +194,7 @@ export async function updatePost(id: string, input: PostInput, session: StudioSe
       input.excerpt,
       input.content,
       input.category,
+      input.techCollection,
       input.topic,
       input.status,
       session.googleSub,
@@ -233,6 +250,12 @@ export function normalizePostInput(value: unknown, fallback?: Partial<PostInput>
   const topic = requestedTopic && topicBelongsToCategory(category, requestedTopic)
     ? requestedTopic
     : defaultTopicForCategory(category);
+  const requestedTechCollection = techCollections.includes(payload.techCollection as TechCollection)
+    ? payload.techCollection as TechCollection
+    : fallback?.techCollection;
+  const techCollection = category === "tech"
+    ? requestedTechCollection ?? defaultTechCollectionForTopic(topic)
+    : null;
   const status = postStatuses.includes(payload.status as PostStatus)
     ? payload.status as PostStatus
     : fallback?.status ?? "draft";
@@ -241,7 +264,7 @@ export function normalizePostInput(value: unknown, fallback?: Partial<PostInput>
   if (status === "published" && (!title.trim() || !excerpt.trim() || !content.trim())) {
     throw new Error("發布前需要填寫標題、摘要與內容");
   }
-  return { title, slug, excerpt, content, category, topic, status };
+  return { title, slug, excerpt, content, category, techCollection, topic, status };
 }
 
 function textValue(value: unknown, fallback: string, maxLength: number, trim = true) {

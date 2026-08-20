@@ -1,4 +1,5 @@
 import type { PostCategory, PostTopic } from "../lib/post-taxonomy";
+import type { TechCollection } from "./tech";
 
 export type EditorTemplate = {
   id: string;
@@ -9,6 +10,7 @@ export type EditorTemplate = {
   excerpt: string;
   content: string;
   category: PostCategory;
+  techCollection: TechCollection | null;
   topic: PostTopic;
 };
 
@@ -21,6 +23,7 @@ export const editorTemplates: EditorTemplate[] = [
     slug: "javascript-var-let-const",
     excerpt: "從作用域、重複宣告、提升與暫時性死區，理解 JavaScript 三種變數宣告方式的差異。",
     category: "tech",
+    techCollection: "web-development",
     topic: "javascript",
     content: `## 先說結論
 

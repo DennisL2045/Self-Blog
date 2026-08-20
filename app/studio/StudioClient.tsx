@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { SafeMarkdown } from "../components/SafeMarkdown";
 import { editorTemplates, getEditorTemplate } from "../content/editor-templates";
+import { techCategories, techCollectionLabel, type TechCollection } from "../content/tech";
 import type { PostCategory, PostRecord, PostStatus } from "../lib/posts";
 import {
   categoryLabel,
@@ -12,12 +13,13 @@ import {
   topicsForCategory,
 } from "../lib/post-taxonomy";
 
-const emptyDraft = (): Pick<PostRecord, "title" | "slug" | "excerpt" | "content" | "category" | "topic" | "status"> => ({
+const emptyDraft = (): Pick<PostRecord, "title" | "slug" | "excerpt" | "content" | "category" | "techCollection" | "topic" | "status"> => ({
   title: "未命名札記",
   slug: "",
   excerpt: "",
   content: "",
   category: "tech",
+  techCollection: "web-development",
   topic: "javascript",
   status: "draft",
 });
@@ -77,7 +79,13 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
 
   function changeCategory(category: PostCategory) {
     if (!draft) return;
-    setDraft({ ...draft, category, topic: defaultTopicForCategory(category) });
+    setDraft({ ...draft, category, techCollection: category === "tech" ? "web-development" : null, topic: defaultTopicForCategory(category) });
+    setDirty(true);
+  }
+
+  function changeTechCollection(techCollection: TechCollection) {
+    if (!draft) return;
+    setDraft({ ...draft, techCollection });
     setDirty(true);
   }
 
@@ -94,6 +102,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
       excerpt: template.excerpt,
       content: template.content,
       category: template.category,
+      techCollection: template.techCollection,
       topic: template.topic,
       status: "draft",
     });
@@ -214,7 +223,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
           <nav aria-label="文章草稿">
             {posts.map((post) => (
               <button key={post.id} className={post.id === draft?.id ? "active" : ""} onClick={() => choose(post)}>
-                <span>{categoryLabel(post.category)} · {topicLabel(post.topic)}</span><strong>{post.title}</strong><small>{statusLabel(post.status)} · {new Date(post.updatedAt).toLocaleString("zh-TW")}</small>
+                <span>{categoryLabel(post.category)}{post.techCollection ? ` · ${techCollectionLabel(post.techCollection)}` : ""} · {topicLabel(post.topic)}</span><strong>{post.title}</strong><small>{statusLabel(post.status)} · {new Date(post.updatedAt).toLocaleString("zh-TW")}</small>
               </button>
             ))}
           </nav>
@@ -230,13 +239,14 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
                 <button type="button" onClick={applyTemplate}>套用範本</button>
               </section>
               <label><span>標題</span><input value={draft.title} onChange={(event) => change("title", event.target.value)} maxLength={160} /></label>
-              <div className="studio-field-row">
+              <div className={`studio-field-row studio-taxonomy-row ${draft.category === "tech" ? "has-tech-collection" : ""}`}>
                 <label><span>文章書架</span><select value={draft.category} onChange={(event) => changeCategory(event.target.value as PostCategory)}>{Object.entries(postTaxonomy).map(([value, item]) => <option value={value} key={value}>{item.label}</option>)}</select><small className="studio-field-help">發布後會流向這個公開區塊。</small></label>
+                {draft.category === "tech" ? <label><span>技術子分類</span><select value={draft.techCollection ?? "web-development"} onChange={(event) => changeTechCollection(event.target.value as TechCollection)}>{techCategories.map((collection) => <option value={collection.slug} key={collection.slug}>{collection.name}</option>)}</select><small className="studio-field-help">決定文章會出現在哪一張技術分類卡片裡。</small></label> : null}
                 <label><span>主題類型</span><select value={draft.topic} onChange={(event) => change("topic", event.target.value as PostRecord["topic"])}>{topicsForCategory(draft.category).map((topic) => <option value={topic.value} key={topic.value}>{topic.label}</option>)}</select><small className="studio-field-help">用來標示文章的具體技術或內容主題。</small></label>
               </div>
               <div className="studio-field-row studio-field-row-wide">
                 <label><span>網址代稱</span><input value={draft.slug} onChange={(event) => change("slug", event.target.value)} placeholder="留白會自動產生" maxLength={80} /></label>
-                <label><span>目前流向</span><output className="studio-destination">{categoryLabel(draft.category)} <b>→</b> {topicLabel(draft.topic)}</output></label>
+                <label><span>目前流向</span><output className="studio-destination">{categoryLabel(draft.category)} {draft.techCollection ? <><b>→</b> {techCollectionLabel(draft.techCollection)}</> : null} <b>→</b> {topicLabel(draft.topic)}</output></label>
               </div>
               <label><span>文章摘要</span><textarea className="studio-excerpt" value={draft.excerpt} onChange={(event) => change("excerpt", event.target.value)} maxLength={500} /></label>
               <div className="editor-toolbar" aria-label="內容格式工具">
@@ -278,7 +288,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
             {message && <p className="studio-message" role="status">{message}</p>}
           </section>
         ) : (
-          <section className="studio-welcome"><span>☾</span><h2>從第一篇文章開始</h2><p>可以直接使用「var、let、const」範本。建立後仍是私人草稿，只有按下發布才會出現在技術成長的 JavaScript 主題。</p><div><button onClick={() => void createNew("javascript-var-let-const")} disabled={busy}>用 JS 範本開始</button><button className="secondary" onClick={() => void createNew()} disabled={busy}>建立空白文章</button></div>{message && <p role="status">{message}</p>}</section>
+          <section className="studio-welcome"><span>☾</span><h2>從第一篇文章開始</h2><p>可以直接使用「var、let、const」範本。建立後仍是私人草稿，只有按下發布才會出現在「技術成長 → Web 開發 → JavaScript」。</p><div><button onClick={() => void createNew("javascript-var-let-const")} disabled={busy}>用 JS 範本開始</button><button className="secondary" onClick={() => void createNew()} disabled={busy}>建立空白文章</button></div>{message && <p role="status">{message}</p>}</section>
         )}
       </div>
     </div>

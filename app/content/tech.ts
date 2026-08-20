@@ -1,5 +1,5 @@
 export type TechCategory = {
-  slug: string;
+  slug: TechCollection;
   name: string;
   english: string;
   summary: string;
@@ -27,7 +27,7 @@ export type TechArticle = {
   sections: TechSection[];
 };
 
-export const techCategories: TechCategory[] = [
+export const techCategories = [
   {
     slug: "web-development",
     name: "Web 開發",
@@ -70,7 +70,27 @@ export const techCategories: TechCategory[] = [
     summary: "理解 Edge、OT／IT、設備資料流與工廠 AI 系統的可靠性設計。",
     topics: ["Edge", "IoT", "OT／IT", "設備監控"],
   },
-];
+] as const;
+
+export type TechCollection = (typeof techCategories)[number]["slug"];
+
+export const techCollections = techCategories.map((category) => category.slug) as TechCollection[];
+
+export function getTechCategory(slug: string) {
+  return techCategories.find((category) => category.slug === slug);
+}
+
+export function techCollectionLabel(collection: TechCollection | null) {
+  return techCategories.find((category) => category.slug === collection)?.name ?? "技術札記";
+}
+
+export function defaultTechCollectionForTopic(topic: string): TechCollection {
+  if (["backend-api", "database"].includes(topic)) return "backend-data";
+  if (topic === "programming") return "programming";
+  if (topic === "system-ops") return "systems-ops";
+  if (topic === "ai-engineering") return "ai-engineering";
+  return "web-development";
+}
 
 // 正式技術文章只由私人編輯室發布，過去的版型示範已撤下。
 export const techArticles: TechArticle[] = [];
