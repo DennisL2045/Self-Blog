@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { listPublicPostSummaries } from "../lib/public-posts";
 import { topicLabel } from "../lib/post-taxonomy";
 
@@ -19,7 +18,7 @@ export async function HomeLatestNotes() {
   return <div className="note-list">{notes.map((note, index) => (
     <article className="note" key={`${note.href}-${note.title}`}>
       <span className="note-index">0{index + 1}</span>
-      <div><p className="note-meta"><time>{note.date}</time> · {note.tag}</p><h3><Link href={note.href}>{note.title}</Link></h3><p>{note.excerpt}</p></div>
+      <div><p className="note-meta"><time>{note.date}</time> · {note.tag}</p><h3><a href={note.href}>{note.title}</a></h3><p>{note.excerpt}</p></div>
       <span className="note-arrow" aria-hidden="true">↗</span>
     </article>
   ))}</div>;

@@ -122,10 +122,11 @@ test("Markdown 一般文字會保留作者輸入的單行換行", async () => {
   assert.doesNotMatch(markdown, /paragraph\.join\(" "\)/);
 });
 
-test("公開文章清單由伺服器輸出並提供清楚的閱讀頁入口", async () => {
-  const [livePosts, homeNotes, readingPage, studio] = await Promise.all([
+test("公開文章清單由伺服器輸出並以完整頁面連結開啟文章", async () => {
+  const [livePosts, homeNotes, postList, readingPage, studio] = await Promise.all([
     readFile(new URL("../app/components/LivePublishedPosts.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/HomeLatestNotes.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/PublishedPostList.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/notes/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),
   ]);
@@ -133,6 +134,9 @@ test("公開文章清單由伺服器輸出並提供清楚的閱讀頁入口", as
   assert.match(livePosts, /listPublicPostSummaries\(category, 50\)/);
   assert.doesNotMatch(homeNotes, /"use client"/);
   assert.match(homeNotes, /listPublicPostSummaries\(undefined, 3\)/);
+  assert.doesNotMatch(homeNotes, /from "next\/link"/);
+  assert.doesNotMatch(postList, /from "next\/link"/);
+  assert.match(postList, /<a href=\{`\/notes\/\$\{post\.slug\}`\}>/);
   assert.match(readingPage, /published-breadcrumb/);
   assert.match(readingPage, /readingMinutes\(post\.content\)/);
   assert.match(readingPage, /alternates: \{ canonical: url \}/);

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { PublishedPostSummary } from "../lib/public-posts";
 import { categoryLabel, topicLabel } from "../lib/post-taxonomy";
 
@@ -9,8 +8,8 @@ export function PublishedPostList({ posts, emptyText }: { posts: PublishedPostSu
       {posts.map((post, index) => (
         <article key={post.id}>
           <span>{String(index + 1).padStart(2, "0")}</span>
-          <div><p>{categoryLabel(post.category)} · {topicLabel(post.topic)} · {formatDate(post.publishedAt ?? post.updatedAt)}</p><h2><Link href={`/notes/${post.slug}`}>{post.title}</Link></h2><div>{post.excerpt}</div></div>
-          <Link className="published-post-link" href={`/notes/${post.slug}`} aria-label={`閱讀${post.title}`}>閱讀全文 <span aria-hidden="true">↗</span></Link>
+          <div><p>{categoryLabel(post.category)} · {topicLabel(post.topic)} · {formatDate(post.publishedAt ?? post.updatedAt)}</p><h2><a href={`/notes/${post.slug}`}>{post.title}</a></h2><div>{post.excerpt}</div></div>
+          <a className="published-post-link" href={`/notes/${post.slug}`} aria-label={`閱讀${post.title}`}>閱讀全文 <span aria-hidden="true">↗</span></a>
         </article>
       ))}
     </div>
