@@ -32,7 +32,9 @@ export function TopBar() {
         <a href="/about#contact" onClick={() => setMenuOpen(false)}>聯絡我</a>
       </nav>
       <div className="topbar-cat" ref={catRef} aria-label="趴在導覽列上的黑色大眼貓" role="img">
-        <span className="topbar-tail" />
+        <span className="topbar-tail">
+          <i className="topbar-tail-tip" />
+        </span>
         <span className="topbar-cat-body" />
         <span className="topbar-cat-head">
           <i className="topbar-ear left" /><i className="topbar-ear right" />

@@ -228,6 +228,7 @@ test("首頁與內頁黑貓維持自然趴姿、全黑耳朵與柔和尾巴", as
   assert.match(catWindow, /className="cat-tail-tip"/);
   assert.match(catWindow, /className="paw paw-left"/);
   assert.match(topbar, /className="topbar-tail"/);
+  assert.match(topbar, /className="topbar-tail-tip"/);
   assert.match(styles, /\.ear::after \{ display:none; \}/);
   assert.match(styles, /\.cat-body \{[^}]*animation:cat-breathe/);
   assert.match(styles, /\.cat \{[^}]*left: auto; right: 4%; bottom: 82px/);
@@ -241,8 +242,12 @@ test("首頁與內頁黑貓維持自然趴姿、全黑耳朵與柔和尾巴", as
   assert.match(styles, /\.cat-tail-tip \{[^}]*right:0; top:72px; width:102px; height:100px[^}]*border-right:27px solid #08080a[^}]*border-bottom:27px solid #08080a[^}]*transform-origin:calc\(100% - 14px\) 8px[^}]*animation:cat-tail-tip-rest/);
   assert.match(styles, /@keyframes cat-tail-tip-rest \{ 0%,100% \{ transform:rotate\(0deg\); \} 50% \{ transform:rotate\(2\.4deg\); \} \}/);
   assert.doesNotMatch(styles, /\.cat-tail::before|\.cat-tail::after/);
-  assert.match(styles, /\.topbar-tail \{[^}]*animation:topbar-tail-rest/);
-  assert.match(styles, /prefers-reduced-motion:[^)]+\)[\s\S]*?\.cat-body, \.cat-head, \.cat-tail-tip, \.topbar-tail \{ animation:none; \}/);
+  assert.match(styles, /\.topbar-tail \{[^}]*right:0; top:42px; width:10px; height:32px[^}]*border-radius:999px[^}]*transform:rotate\(7deg\)/);
+  assert.doesNotMatch(styles, /\.topbar-tail \{[^}]*animation:/);
+  assert.match(styles, /\.topbar-tail-tip \{[^}]*right:0; top:20px; width:38px; height:30px[^}]*border-right:9px solid #09090b[^}]*border-bottom:9px solid #09090b[^}]*animation:topbar-tail-tip-rest/);
+  assert.match(styles, /@keyframes topbar-tail-tip-rest \{ 0%,100% \{ transform:rotate\(0deg\); \} 50% \{ transform:rotate\(2\.4deg\); \} \}/);
+  assert.doesNotMatch(styles, /\.topbar-tail::after/);
+  assert.match(styles, /prefers-reduced-motion:[^)]+\)[\s\S]*?\.cat-body, \.cat-head, \.cat-tail-tip, \.topbar-tail-tip \{ animation:none; \}/);
 });
 
 test("所有三區塊標題統一為標題在上、標示與說明在下", async () => {
