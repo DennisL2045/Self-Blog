@@ -199,6 +199,25 @@ test("上方導覽固定並放大主要閱讀文字", async () => {
   assert.match(styles, /\.published-reading > footer, \.reading-footer, \.collection-footer \{ font-size:\.92rem; \}/);
 });
 
+test("平板與手機使用置中貓咪與漢堡選單", async () => {
+  const [topbar, styles] = await Promise.all([
+    readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(topbar, /useRef, useState/);
+  assert.match(topbar, /id="inner-navigation"/);
+  assert.match(topbar, /className=\{`inner-nav \$\{menuOpen \? "open" : ""\}`\}/);
+  assert.match(topbar, /aria-expanded=\{menuOpen\}/);
+  assert.match(topbar, /aria-controls="inner-navigation"/);
+  assert.match(topbar, /className=\{`menu-toggle \$\{menuOpen \? "open" : ""\}`\}/);
+  assert.match(styles, /\.menu-toggle \{ display:none; \}/);
+  assert.match(styles, /@media \(max-width:1100px\)[\s\S]*?\.topbar-cat \{ left:50%; right:auto; transform:translateX\(-50%\) scale\(\.9\)/);
+  assert.match(styles, /@media \(max-width:1100px\)[\s\S]*?\.menu-toggle \{[^}]*display:flex/);
+  assert.match(styles, /@media \(max-width:1100px\)[\s\S]*?\.inner-nav\.open \{ opacity:1; visibility:visible; pointer-events:auto/);
+  assert.match(styles, /@media \(max-width:1100px\)[\s\S]*?\.series-nav \{[^}]*overflow-x:auto/);
+  assert.match(styles, /@media \(max-width:520px\)[\s\S]*?\.inner-nav \{ left:12px; right:12px; width:auto; grid-template-columns:1fr/);
+});
+
 test("文章總覽與四個系列頁形成完整導覽", async () => {
   const [articlesHtml, legacyNotesHtml, seriesNav] = await Promise.all([
     renderHtml("/articles"),
