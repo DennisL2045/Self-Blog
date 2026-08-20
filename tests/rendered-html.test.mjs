@@ -235,9 +235,9 @@ test("首頁與內頁黑貓維持自然趴姿、全黑耳朵與柔和尾巴", as
   assert.match(styles, /\.cat-head \{[^}]*left: 16px; top: 48px/);
   assert.match(styles, /\.paw \{[^}]*z-index:4[^}]*width:88px; height:40px/);
   assert.match(styles, /\.paw-left \{ z-index:5; left:94px; transform:rotate\(7deg\); \} \.paw-right \{ left:147px/);
-  assert.match(styles, /\.cat-tail \{[^}]*right:5px; top:108px; width:102px; height:192px[^}]*border-right:27px solid #08080a[^}]*border-bottom:27px solid #08080a[^}]*border-bottom-right-radius:78px 72px[^}]*border-bottom-left-radius:52px 25px[^}]*animation:cat-tail-rest/);
-  assert.match(styles, /\.cat-tail::before \{[^}]*right:10px; top:20px; width:72px; height:38px[^}]*rotate\(18deg\)/);
-  assert.doesNotMatch(styles, /\.cat-tail::after/);
+  assert.match(styles, /\.cat-tail \{[^}]*right:28px; top:128px; width:102px; height:172px[^}]*border-right:27px solid #08080a[^}]*border-bottom:27px solid #08080a[^}]*border-bottom-right-radius:78px 72px[^}]*border-bottom-left-radius:52px 25px[^}]*animation:cat-tail-rest/);
+  assert.match(styles, /@keyframes cat-tail-rest \{ 0%,100% \{ transform:rotate\(7\.5deg\); \} 50% \{ transform:rotate\(9\.5deg\); \} \}/);
+  assert.doesNotMatch(styles, /\.cat-tail::before|\.cat-tail::after/);
   assert.match(styles, /\.topbar-tail \{[^}]*animation:topbar-tail-rest/);
   assert.match(styles, /prefers-reduced-motion:[^)]+\)[\s\S]*?\.cat-body, \.cat-head, \.cat-tail, \.topbar-tail \{ animation:none; \}/);
 });

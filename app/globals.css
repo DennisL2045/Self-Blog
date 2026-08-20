@@ -52,12 +52,11 @@ nav a:hover::after, nav a:focus-visible::after { right: 0; }
 .paw::before, .paw::after { content:""; position:absolute; bottom:8px; height:11px; border-left:1px solid #1d1c21; }
 .paw::before { left:34px; } .paw::after { left:59px; }
 .paw-left { z-index:5; left:94px; transform:rotate(7deg); } .paw-right { left:147px; right:auto; transform:rotate(-7deg); }
-.cat-tail { position:absolute; z-index:0; right:5px; top:108px; width:102px; height:192px; border-right:27px solid #08080a; border-bottom:27px solid #08080a; border-bottom-right-radius:78px 72px; border-bottom-left-radius:52px 25px; background:transparent; transform-origin:90% 4%; animation:cat-tail-rest 5.6s ease-in-out infinite; }
-.cat-tail::before { content:""; position:absolute; right:10px; top:20px; width:72px; height:38px; border-radius:58% 42% 54% 46%; background:#08080a; transform:rotate(18deg); transform-origin:100% 50%; }
+.cat-tail { position:absolute; z-index:0; right:28px; top:128px; width:102px; height:172px; border-right:27px solid #08080a; border-bottom:27px solid #08080a; border-bottom-right-radius:78px 72px; border-bottom-left-radius:52px 25px; background:transparent; transform-origin:90% 4%; animation:cat-tail-rest 5.6s ease-in-out infinite; }
 
 @keyframes cat-breathe { 0%,100% { transform:scaleY(1); } 50% { transform:scaleY(1.018); } }
 @keyframes cat-head-rest { 0%,100% { transform:translateY(0) rotate(-1deg); } 50% { transform:translateY(1px) rotate(-.3deg); } }
-@keyframes cat-tail-rest { 0%,100% { transform:rotate(-1.5deg); } 50% { transform:rotate(.8deg); } }
+@keyframes cat-tail-rest { 0%,100% { transform:rotate(7.5deg); } 50% { transform:rotate(9.5deg); } }
 
 .hero-copy { padding: clamp(46px, 6vw, 76px) clamp(34px, 4vw, 60px); display:flex; flex-direction:column; justify-content:center; background: #a95648; color:#f5ecdd; position:relative; }
 .hero-copy::before { content:""; position:absolute; top:44px; right:42px; width:55px; height:55px; border-top:1px solid rgba(255,255,255,.35); border-right:1px solid rgba(255,255,255,.35); }
