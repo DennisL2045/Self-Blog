@@ -26,10 +26,16 @@ export default async function TechArticlePage({ params }: { params: Promise<{ sl
       <main className="inner-page tech-page tech-collection-page">
         <TopBar />
         <section className="inner-content">
-          <header className="inner-heading"><p>{category.english}</p><h1>{category.name}</h1><span>{category.summary}</span></header>
+          <header className="collection-hero">
+            <h1>{category.name}</h1>
+            <div><p>{category.english}</p><span>{category.summary}</span></div>
+          </header>
           <SeriesNav current="tech" />
           <section className="collection-article-list" aria-labelledby="collection-articles-title">
-            <div><p>Filed notes</p><h2 id="collection-articles-title">{category.name}文章</h2><span>{category.topics.join("、")}</span></div>
+            <header className="collection-article-heading">
+              <h2 id="collection-articles-title">{category.name}文章</h2>
+              <div><p>Filed notes</p><span>{category.topics.join("、")}</span></div>
+            </header>
             <LivePublishedPosts category="tech" techCollection={category.slug} emptyText={`「${category.name}」目前還沒有公開文章。`} />
           </section>
           <footer className="collection-footer"><a href="/tech">← 回到全部技術分類</a><a href="/articles">文章總覽</a><a href="/">返回首頁</a></footer>

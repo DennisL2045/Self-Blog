@@ -149,20 +149,27 @@ test("公開文章清單由伺服器輸出並以完整頁面連結開啟文章",
 });
 
 test("技術分類卡片會開啟自己的文章列表", async () => {
-  const [webHtml, backendHtml, techPage, posts, editor] = await Promise.all([
+  const [webHtml, backendHtml, techPage, collectionPage, posts, editor, styles] = await Promise.all([
     renderHtml("/tech/web-development"),
     renderHtml("/tech/backend-data"),
     readFile(new URL("../app/tech/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/posts.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
   assert.match(webHtml, />Web 開發</);
   assert.match(webHtml, /Web 開發(?:<!-- -->)?文章/);
   assert.match(backendHtml, />後端與資料</);
   assert.match(techPage, /href=\{`\/tech\/\$\{category\.slug\}`\}/);
+  assert.match(collectionPage, /className="collection-hero"/);
+  assert.match(collectionPage, /className="collection-article-heading"/);
   assert.match(posts, /AND tech_collection = \?/);
   assert.match(posts, /defaultTechCollectionForTopic/);
   assert.match(editor, /技術成長.*Web 開發.*JavaScript/);
+  assert.match(styles, /\.collection-hero > div[^}]*display:flex[^}]*justify-content:space-between/);
+  assert.match(styles, /\.collection-article-list > \.published-post-list \{ display:block; width:100%; \}/);
+  assert.doesNotMatch(styles, /\.collection-article-list > div \{/);
 });
 
 test("全站套用指定字體並放寬首頁與技術版面", async () => {
@@ -175,6 +182,8 @@ test("全站套用指定字體並放寬首頁與技術版面", async () => {
   assert.match(styles, /\.hero \{ width: min\(1400px/);
   assert.match(styles, /\.tech-hero \{ width:min\(1320px/);
   assert.match(styles, /\.series-nav \{[^}]*gap:0/);
+  assert.match(styles, /\.hero-copy h1[^}]*3\.15rem/);
+  assert.match(styles, /\.published-reading > header h1[^}]*3\.35rem/);
   assert.match(styles, /body, body \*, body \*::before, body \*::after \{ font-family:var\(--site-font\) !important/);
   assert.match(layout, /rel="preload"[^>]*jf-openhuninn-2\.1\.ttf/);
 });
