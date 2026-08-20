@@ -218,6 +218,23 @@ test("平板與手機使用置中貓咪與漢堡選單", async () => {
   assert.match(styles, /@media \(max-width:520px\)[\s\S]*?\.inner-nav \{ left:12px; right:12px; width:auto; grid-template-columns:1fr/);
 });
 
+test("首頁與內頁黑貓維持自然趴姿、全黑耳朵與柔和尾巴", async () => {
+  const [catWindow, topbar, styles] = await Promise.all([
+    readFile(new URL("../app/CatWindow.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(catWindow, /className="cat-tail"/);
+  assert.match(catWindow, /className="paw paw-left"/);
+  assert.match(topbar, /className="topbar-tail"/);
+  assert.match(styles, /\.ear::after \{ display:none; \}/);
+  assert.match(styles, /\.cat-body \{[^}]*animation:cat-breathe/);
+  assert.match(styles, /\.cat-tail \{[^}]*border-radius:52% 58% 54% 48%[^}]*animation:cat-tail-rest/);
+  assert.match(styles, /\.cat-tail::after \{[^}]*border-radius:45% 65% 65% 45%/);
+  assert.match(styles, /\.topbar-tail \{[^}]*animation:topbar-tail-rest/);
+  assert.match(styles, /prefers-reduced-motion:[^)]+\)[\s\S]*?\.cat-body, \.cat-head, \.cat-tail, \.topbar-tail \{ animation:none; \}/);
+});
+
 test("所有三區塊標題統一為標題在上、標示與說明在下", async () => {
   const [styles, home, articles, tech, quickLook, experience, travel, about] = await Promise.all([
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
