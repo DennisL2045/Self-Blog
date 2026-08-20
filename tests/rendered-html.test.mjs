@@ -188,6 +188,17 @@ test("全站套用指定字體並放寬首頁與技術版面", async () => {
   assert.match(layout, /rel="preload"[^>]*jf-openhuninn-2\.1\.ttf/);
 });
 
+test("上方導覽固定並放大主要閱讀文字", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.site-header, \.inner-topbar \{ position:sticky; top:0; z-index:50; \}/);
+  assert.match(styles, /\.site-header nav \{ font-size:\.98rem; \}/);
+  assert.match(styles, /\.inner-nav \{ font-size:1rem; \}/);
+  assert.match(styles, /\.series-nav strong \{ font-size:1\.02rem; \}/);
+  assert.match(styles, /\.safe-markdown \{ font-size:1\.12rem; line-height:2\.05; \}/);
+  assert.match(styles, /\.published-reading > header div \{ font-size:1\.16rem; \}/);
+  assert.match(styles, /\.published-reading > footer, \.reading-footer, \.collection-footer \{ font-size:\.92rem; \}/);
+});
+
 test("文章總覽與四個系列頁形成完整導覽", async () => {
   const [articlesHtml, legacyNotesHtml, seriesNav] = await Promise.all([
     renderHtml("/articles"),

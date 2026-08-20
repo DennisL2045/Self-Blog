@@ -327,3 +327,33 @@ body, body *, body *::before, body *::after { font-family:var(--site-font) !impo
   .studio-preview-body { padding:6px 18px 48px; }
   .studio-direct-editor { padding:24px 18px 48px; }
 }
+
+/* Persistent navigation and more comfortable reading sizes */
+html { scroll-padding-top:110px; }
+.site-header, .inner-topbar { position:sticky; top:0; z-index:50; }
+.site-header { background:rgba(238,232,220,.96); box-shadow:0 8px 22px rgba(32,31,38,.06); backdrop-filter:blur(10px); }
+.inner-topbar { box-shadow:0 8px 22px rgba(32,31,38,.08); }
+.site-header nav { font-size:.98rem; }
+.inner-brand { font-size:1.22rem; }
+.inner-nav { font-size:1rem; }
+.series-nav strong { font-size:1.02rem; }
+.inner-heading > span, .collection-hero span { font-size:1rem; }
+.article-index article div > span { font-size:1rem; }
+.tech-category-card > div, .quick-look-entry > div { font-size:.95rem; }
+.tech-reading > header > div { font-size:1.08rem; }
+.reading-sections p { font-size:1.1rem; }
+.published-post-list h2 { font-size:clamp(1.35rem,2vw,1.85rem); }
+.published-post-list article div div { font-size:.98rem; }
+.published-post-link { font-size:.84rem !important; }
+.published-breadcrumb { font-size:.84rem; }
+.published-reading > header div { font-size:1.16rem; }
+.safe-markdown { font-size:1.12rem; line-height:2.05; }
+.markdown-table-wrap td { font-size:.96rem; }
+.published-reading > footer, .reading-footer, .collection-footer { font-size:.92rem; }
+
+@media (max-width:520px) {
+  html { scroll-padding-top:92px; }
+  .inner-brand { font-size:1.05rem; }
+  .inner-nav { font-size:.92rem; }
+  .safe-markdown, .reading-sections p { font-size:1.05rem; }
+}
