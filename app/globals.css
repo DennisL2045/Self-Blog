@@ -393,3 +393,59 @@ html { scroll-padding-top:110px; }
   .reading-body aside { grid-template-columns:1fr; }
   .reading-body aside span { grid-column:auto; }
 }
+
+/* Every editorial heading follows the same two-level composition. */
+.inner-heading,
+.portal-heading,
+.tech-hero,
+.article-hub-heading {
+  grid-template-columns:minmax(0,1fr) minmax(280px,1fr);
+  grid-template-areas:
+    "title title"
+    "label description";
+  column-gap:48px;
+  row-gap:52px;
+  align-items:end;
+}
+
+.inner-heading h1,
+.portal-heading h2,
+.tech-hero h1,
+.article-hub-heading h2 { grid-area:title; }
+
+.inner-heading p,
+.portal-heading p,
+.tech-hero > p,
+.article-hub-heading p { grid-area:label; align-self:end; }
+
+.inner-heading > span,
+.portal-heading > span,
+.tech-hero > span,
+.article-hub-heading > span {
+  grid-area:description;
+  justify-self:end;
+  max-width:560px;
+  text-align:right;
+}
+
+@media (max-width:760px) {
+  .inner-heading,
+  .portal-heading,
+  .tech-hero,
+  .article-hub-heading {
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "title"
+      "label"
+      "description";
+    row-gap:16px;
+  }
+
+  .inner-heading > span,
+  .portal-heading > span,
+  .tech-hero > span,
+  .article-hub-heading > span {
+    justify-self:start;
+    text-align:left;
+  }
+}

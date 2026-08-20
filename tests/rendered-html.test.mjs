@@ -218,6 +218,30 @@ test("平板與手機使用置中貓咪與漢堡選單", async () => {
   assert.match(styles, /@media \(max-width:520px\)[\s\S]*?\.inner-nav \{ left:12px; right:12px; width:auto; grid-template-columns:1fr/);
 });
 
+test("所有三區塊標題統一為標題在上、標示與說明在下", async () => {
+  const [styles, home, articles, tech, quickLook, experience, travel, about] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    renderHtml("/"),
+    renderHtml("/articles"),
+    renderHtml("/tech"),
+    renderHtml("/tech/quick-look"),
+    renderHtml("/experience"),
+    renderHtml("/travel"),
+    renderHtml("/about"),
+  ]);
+
+  assert.match(home, /class="portal-heading"/);
+  assert.match(articles, /class="inner-heading"/);
+  assert.match(articles, /class="article-hub-heading"/);
+  assert.match(tech, /class="tech-hero"/);
+  for (const html of [quickLook, experience, travel, about]) assert.match(html, /class="inner-heading"/);
+
+  assert.match(styles, /\.inner-heading,\s*\.portal-heading,\s*\.tech-hero,\s*\.article-hub-heading \{\s*grid-template-columns:minmax\(0,1fr\) minmax\(280px,1fr\);\s*grid-template-areas:\s*"title title"\s*"label description"/);
+  assert.match(styles, /\.inner-heading h1,\s*\.portal-heading h2,\s*\.tech-hero h1,\s*\.article-hub-heading h2 \{ grid-area:title; \}/);
+  assert.match(styles, /\.inner-heading > span,[\s\S]*?\.article-hub-heading > span \{\s*grid-area:description;\s*justify-self:end;[\s\S]*?text-align:right/);
+  assert.match(styles, /@media \(max-width:760px\)[\s\S]*?grid-template-areas:\s*"title"\s*"label"\s*"description"/);
+});
+
 test("文章總覽與四個系列頁形成完整導覽", async () => {
   const [articlesHtml, legacyNotesHtml, seriesNav] = await Promise.all([
     renderHtml("/articles"),
