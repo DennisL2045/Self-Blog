@@ -1,1 +1,1 @@
-export const siteUrl = "https://night-notes-cat.songming1111.chatgpt.site";
+export const siteUrl = "https://dennisnightnotes.com";

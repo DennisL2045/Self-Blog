@@ -30,8 +30,8 @@
 
 在 Google Cloud Console 建立「Web application」OAuth Client，加入：
 
-- Authorized JavaScript origin：`https://night-notes-cat.songming1111.chatgpt.site`
-- Authorized redirect URI：`https://night-notes-cat.songming1111.chatgpt.site/api/studio/session`
+- Authorized JavaScript origin：`https://dennisnightnotes.com`
+- Authorized redirect URI：`https://dennisnightnotes.com/api/studio/session`
 - 本機開發可另加 `http://localhost:3000` 與 `http://localhost:3000/api/studio/session`
 
 執行環境需要下列值，格式可參考 `.env.example`：
