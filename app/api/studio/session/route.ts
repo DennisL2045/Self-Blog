@@ -1,9 +1,21 @@
 import {
   createStudioSessionToken,
+  expiredStudioSessionCookie,
+  getStudioSessionFromRequest,
   readCookie,
   studioSessionCookie,
   verifyGoogleCredential,
 } from "../../../lib/studio-auth";
+
+export async function GET(request: Request) {
+  const session = await getStudioSessionFromRequest(request);
+  const headers = new Headers({ "Cache-Control": "no-store" });
+  if (!session) headers.set("Set-Cookie", expiredStudioSessionCookie(request));
+  return Response.json(
+    { authenticated: Boolean(session), expiresAt: session?.expiresAt ?? null },
+    { status: session ? 200 : 401, headers },
+  );
+}
 
 export async function POST(request: Request) {
   let error = "invalid";
@@ -25,7 +37,7 @@ export async function POST(request: Request) {
     console.error("[studio-session]", caught instanceof Error ? caught.message : "unknown_error");
   }
 
-  return studioRedirect(request, `/studio?error=${error}`);
+  return studioRedirect(request, `/studio?error=${error}`, expiredStudioSessionCookie(request));
 }
 
 function studioRedirect(request: Request, pathname: string, cookie?: string) {

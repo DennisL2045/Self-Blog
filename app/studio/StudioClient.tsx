@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SafeMarkdown } from "../components/SafeMarkdown";
 import { editorTemplates, getEditorTemplate } from "../content/editor-templates";
 import { techCategories, techCollectionLabel, type TechCollection } from "../content/tech";
@@ -24,7 +24,7 @@ const emptyDraft = (): Pick<PostRecord, "title" | "slug" | "excerpt" | "content"
   status: "draft",
 });
 
-export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord[]; email: string }) {
+export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initialPosts: PostRecord[]; email: string; sessionExpiresAt: number }) {
   const [posts, setPosts] = useState(initialPosts);
   const [draft, setDraft] = useState<PostRecord | null>(initialPosts[0] ?? null);
   const [dirty, setDirty] = useState(false);
@@ -36,6 +36,58 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
   const previewBodyRef = useRef<HTMLDivElement>(null);
   const directEditorRef = useRef<HTMLTextAreaElement>(null);
   const previewScrollRatioRef = useRef(0);
+
+  useEffect(() => {
+    let disposed = false;
+    let redirecting = false;
+    const redirectToLogin = () => {
+      if (disposed || redirecting) return;
+      redirecting = true;
+      window.location.replace("/studio?error=expired");
+    };
+    const checkSession = async () => {
+      if (Date.now() >= sessionExpiresAt) {
+        redirectToLogin();
+        return;
+      }
+      try {
+        const response = await fetch("/api/studio/session", {
+          method: "GET",
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        if (response.status === 401) redirectToLogin();
+      } catch {
+        // A temporary network error is not the same as being signed out.
+      }
+    };
+
+    const expirationTimer = window.setTimeout(
+      redirectToLogin,
+      Math.max(0, sessionExpiresAt - Date.now() + 1_000),
+    );
+    const sessionTimer = window.setInterval(() => void checkSession(), 60_000);
+    const handleFocus = () => void checkSession();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") void checkSession();
+    };
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      disposed = true;
+      window.clearTimeout(expirationTimer);
+      window.clearInterval(sessionTimer);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [sessionExpiresAt]);
+
+  function redirectIfSignedOut(response: Response) {
+    if (response.status !== 401) return false;
+    window.location.replace("/studio?error=expired");
+    return true;
+  }
 
   function choose(post: PostRecord) {
     if (dirty && !window.confirm("目前修改尚未儲存，仍要切換文章嗎？")) return;
@@ -64,6 +116,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (redirectIfSignedOut(response)) return;
       const data = await response.json() as { post?: PostRecord; error?: string };
       if (!response.ok || !data.post) throw new Error(data.error ?? "建立失敗");
       setPosts((current) => [data.post!, ...current]);
@@ -141,6 +194,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (redirectIfSignedOut(response)) return;
       const data = await response.json() as { post?: PostRecord; error?: string };
       if (!response.ok || !data.post) throw new Error(data.error ?? "儲存失敗");
       setPosts((current) => current.map((post) => post.id === data.post!.id ? data.post! : post).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)));
@@ -159,6 +213,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
     setBusy(true);
     try {
       const response = await fetch(`/api/studio/posts/${draft.id}`, { method: "DELETE" });
+      if (redirectIfSignedOut(response)) return;
       const data = await response.json() as { post?: PostRecord; error?: string };
       if (!response.ok || !data.post) throw new Error(data.error ?? "封存失敗");
       setPosts((current) => current.map((post) => post.id === data.post!.id ? data.post! : post));
@@ -196,6 +251,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
       form.set("postId", draft.id);
       form.set("alt", file.name.replace(/\.[^.]+$/, ""));
       const response = await fetch("/api/studio/media", { method: "POST", body: form });
+      if (redirectIfSignedOut(response)) return;
       const data = await response.json() as { markdown?: string; error?: string };
       if (!response.ok || !data.markdown) throw new Error(data.error ?? "上傳失敗");
       const separator = draft.content && !draft.content.endsWith("\n") ? "\n\n" : "";
@@ -212,7 +268,7 @@ export function StudioClient({ initialPosts, email }: { initialPosts: PostRecord
     <div className="studio-shell">
       <header className="studio-header">
         <div><span>Private writing room</span><h1>夜行編輯室</h1></div>
-        <div><small>{email}</small><form action="/api/studio/logout" method="post"><button type="submit">安全登出</button></form></div>
+        <div><span className="studio-session-state"><i />已登入</span><small>{email}</small><form action="/api/studio/logout" method="post"><button type="submit">安全登出</button></form></div>
       </header>
       <div className="studio-layout">
         <aside className="studio-sidebar">

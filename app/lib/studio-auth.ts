@@ -8,10 +8,14 @@ const SESSION_ISSUER = "night-notes-studio";
 const SESSION_AUDIENCE = "night-notes-editor";
 const SESSION_DURATION_SECONDS = 60 * 60 * 12;
 
-export type StudioSession = {
+export type StudioIdentity = {
   googleSub: string;
   email: string;
   name: string;
+};
+
+export type StudioSession = StudioIdentity & {
+  expiresAt: number;
 };
 
 export function getStudioConfiguration() {
@@ -33,7 +37,7 @@ export function getStudioConfiguration() {
   };
 }
 
-export async function verifyGoogleCredential(credential: string): Promise<StudioSession> {
+export async function verifyGoogleCredential(credential: string): Promise<StudioIdentity> {
   const config = getStudioConfiguration();
   if (!config.ready) throw new Error("studio_not_configured");
 
@@ -57,7 +61,7 @@ export async function verifyGoogleCredential(credential: string): Promise<Studio
   };
 }
 
-export async function createStudioSessionToken(session: StudioSession): Promise<string> {
+export async function createStudioSessionToken(session: StudioIdentity): Promise<string> {
   const { sessionSecret } = getStudioConfiguration();
   if (sessionSecret.length < 32) throw new Error("studio_not_configured");
 
@@ -83,11 +87,12 @@ export async function readStudioSessionToken(token?: string | null): Promise<Stu
       algorithms: ["HS256"],
     });
     const email = typeof payload.email === "string" ? payload.email.toLocaleLowerCase("en-US") : "";
-    if (!payload.sub || !email || !config.allowedEmails.has(email)) return null;
+    if (!payload.sub || !email || !config.allowedEmails.has(email) || typeof payload.exp !== "number") return null;
     return {
       googleSub: payload.sub,
       email,
       name: typeof payload.name === "string" && payload.name ? payload.name : email,
+      expiresAt: payload.exp * 1000,
     };
   } catch {
     return null;

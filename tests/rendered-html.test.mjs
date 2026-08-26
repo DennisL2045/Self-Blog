@@ -334,12 +334,48 @@ test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線",
 });
 
 test("Google 登入回呼使用可寫入 Cookie 的重新導向回應", async () => {
-  const sessionRoute = await readFile(new URL("../app/api/studio/session/route.ts", import.meta.url), "utf8");
+  const [sessionRoute, logoutRoute] = await Promise.all([
+    readFile(new URL("../app/api/studio/session/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/logout/route.ts", import.meta.url), "utf8"),
+  ]);
 
   assert.doesNotMatch(sessionRoute, /Response\.redirect/);
   assert.match(sessionRoute, /new Response\(null, \{ status: 303, headers \}\)/);
   assert.match(sessionRoute, /headers\.set\("Set-Cookie", cookie\)/);
   assert.match(sessionRoute, /"Cache-Control": "no-store"/);
+  assert.doesNotMatch(logoutRoute, /Response\.redirect/);
+  assert.match(logoutRoute, /"Set-Cookie": expiredStudioSessionCookie\(request\)/);
+  assert.match(logoutRoute, /new Response\(null, \{ status: 303, headers \}\)/);
+});
+
+test("編輯室登入按鈕與工作階段使用同一個伺服器狀態", async () => {
+  const [page, login, editor, sessionRoute, auth, styles] = await Promise.all([
+    readFile(new URL("../app/studio/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/studio/StudioLogin.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/session/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/studio-auth.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /<StudioLogin clientId=\{config\.clientId\} loginUri=\{loginUri\} \/>/);
+  assert.match(page, /目前未登入/);
+  assert.match(page, /sessionExpiresAt=\{session\.expiresAt\}/);
+  assert.doesNotMatch(page, /g_id_onload|g_id_signin|<script src="https:\/\/accounts\.google\.com/);
+  assert.match(login, /accounts\.google\.com\/gsi\/client/);
+  assert.match(login, /identity\.renderButton/);
+  assert.match(login, /重新載入登入按鈕/);
+  assert.match(editor, /fetch\("\/api\/studio\/session"/);
+  assert.match(editor, /visibilitychange/);
+  assert.match(editor, /response\.status === 401/);
+  assert.match(editor, /window\.location\.replace\("\/studio\?error=expired"\)/);
+  assert.match(editor, /className="studio-session-state"/);
+  assert.match(sessionRoute, /export async function GET\(request: Request\)/);
+  assert.match(sessionRoute, /status: session \? 200 : 401/);
+  assert.match(sessionRoute, /expiredStudioSessionCookie\(request\)/);
+  assert.match(auth, /expiresAt: payload\.exp \* 1000/);
+  assert.match(styles, /\.studio-login-state \{[^}]*display:flex/);
+  assert.match(styles, /\.studio-session-state \{[^}]*display:inline-flex/);
 });
 
 test("文章內容與照片採安全輸出及版本保存", async () => {
