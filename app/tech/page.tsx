@@ -1,5 +1,5 @@
 import { TopBar } from "../TopBar";
-import { PublishedPostList } from "../components/PublishedPostList";
+import { PaginatedPostList } from "../components/PaginatedPostList";
 import { SeriesNav } from "../components/SeriesNav";
 import { techCategories } from "../content/tech";
 import { listPublicPostSummaries } from "../lib/public-posts";
@@ -39,7 +39,7 @@ export default async function TechPage() {
           <b>打開名詞小冊 ↗</b>
         </a>
       </section>
-      <section className="published-tech"><div><p>Growing library</p><h2>技術札記</h2></div><PublishedPostList posts={posts} emptyText="第一篇技術文章準備中。發布後會依主題顯示在這裡。" /></section>
+      <section className="published-tech"><div><p>Growing library</p><h2>技術札記</h2></div><PaginatedPostList posts={posts} emptyText="第一篇技術文章準備中。發布後會依主題顯示在這裡。" /></section>
     </main>
   );
 }

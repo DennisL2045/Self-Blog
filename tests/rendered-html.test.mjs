@@ -163,15 +163,33 @@ test("技術分類卡片會開啟自己的文章列表", async () => {
   assert.match(backendHtml, />後端與資料</);
   assert.match(techPage, /href=\{`\/tech\/\$\{category\.slug\}`\}/);
   assert.match(techPage, /articleCounts\.get\(category\.slug\)/);
-  assert.match(techPage, /PublishedPostList posts=\{posts\}/);
+  assert.match(techPage, /PaginatedPostList posts=\{posts\}/);
   assert.match(collectionPage, /className="collection-hero"/);
   assert.match(collectionPage, /className="collection-article-heading"/);
   assert.match(posts, /AND tech_collection = \?/);
   assert.match(posts, /defaultTechCollectionForTopic/);
   assert.match(editor, /技術成長.*Web 開發.*JavaScript/);
   assert.match(styles, /\.collection-hero > div[^}]*display:flex[^}]*justify-content:space-between/);
-  assert.match(styles, /\.collection-article-list > \.published-post-list \{ display:block; width:100%; \}/);
+  assert.match(styles, /\.collection-article-list > \.paginated-posts \{ display:block; width:100%; \}/);
   assert.doesNotMatch(styles, /\.collection-article-list > div \{/);
+});
+
+test("技術總列表與分類列表只更新下方文章並使用前端頁碼", async () => {
+  const [pagination, techPage, collectionPage, styles] = await Promise.all([
+    readFile(new URL("../app/components/PaginatedPostList.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/tech/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(pagination, /"use client"/);
+  assert.match(pagination, /pageSize = 5/);
+  assert.match(pagination, /posts\.slice\(startIndex, startIndex \+ pageSize\)/);
+  assert.match(pagination, /aria-label="文章分頁"/);
+  assert.match(pagination, /aria-current=\{pageNumber === currentPage \? "page" : undefined\}/);
+  assert.doesNotMatch(pagination, /location|router|href=/);
+  assert.match(techPage, /<PaginatedPostList posts=\{posts\}/);
+  assert.match(collectionPage, /<PaginatedPostList posts=\{posts\}/);
+  assert.match(styles, /\.article-pagination \{/);
 });
 
 test("公開文章清單只讀取列表所需欄位", async () => {

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { TopBar } from "../../TopBar";
-import { LivePublishedPosts } from "../../components/LivePublishedPosts";
+import { PaginatedPostList } from "../../components/PaginatedPostList";
 import { SeriesNav } from "../../components/SeriesNav";
 import { getTechArticle, getTechCategory, techArticles, techCategories } from "../../content/tech";
+import { listPublicPostSummaries } from "../../lib/public-posts";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default async function TechArticlePage({ params }: { params: Promise<{ sl
   const slug = (await params).slug;
   const category = getTechCategory(slug);
   if (category) {
+    const posts = await listPublicPostSummaries("tech", 50, category.slug);
     return (
       <main className="inner-page tech-page tech-collection-page">
         <TopBar />
@@ -36,7 +38,7 @@ export default async function TechArticlePage({ params }: { params: Promise<{ sl
               <h2 id="collection-articles-title">{category.name}文章</h2>
               <div><p>Filed notes</p><span>{category.topics.join("、")}</span></div>
             </header>
-            <LivePublishedPosts category="tech" techCollection={category.slug} emptyText={`「${category.name}」目前還沒有公開文章。`} />
+            <PaginatedPostList posts={posts} emptyText={`「${category.name}」目前還沒有公開文章。`} />
           </section>
           <footer className="collection-footer"><a href="/tech">← 回到全部技術分類</a><a href="/articles">文章總覽</a><a href="/">返回首頁</a></footer>
         </section>
