@@ -8,10 +8,12 @@ import {
   getStudioSessionFromRequest,
   isSameOriginMutation,
 } from "../../../../lib/studio-auth";
+import { hasStudioGatewayAccess, studioNotFoundResponse } from "../../../../lib/studio-gateway";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PUT(request: Request, { params }: RouteContext) {
+  if (!(await hasStudioGatewayAccess(request.headers))) return studioNotFoundResponse();
   const session = await getStudioSessionFromRequest(request);
   if (!session) return Response.json({ error: "unauthorized" }, { status: 401 });
   if (!isSameOriginMutation(request)) return Response.json({ error: "forbidden" }, { status: 403 });
@@ -38,6 +40,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
 }
 
 export async function DELETE(request: Request, { params }: RouteContext) {
+  if (!(await hasStudioGatewayAccess(request.headers))) return studioNotFoundResponse();
   const session = await getStudioSessionFromRequest(request);
   if (!session) return Response.json({ error: "unauthorized" }, { status: 401 });
   if (!isSameOriginMutation(request)) return Response.json({ error: "forbidden" }, { status: 403 });

@@ -3,6 +3,7 @@ import {
   getStudioSessionFromRequest,
   isSameOriginMutation,
 } from "../../../lib/studio-auth";
+import { hasStudioGatewayAccess, studioNotFoundResponse } from "../../../lib/studio-gateway";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const IMAGE_TYPES = {
@@ -12,6 +13,7 @@ const IMAGE_TYPES = {
 } as const;
 
 export async function POST(request: Request) {
+  if (!(await hasStudioGatewayAccess(request.headers))) return studioNotFoundResponse();
   const session = await getStudioSessionFromRequest(request);
   if (!session) return Response.json({ error: "unauthorized" }, { status: 401 });
   if (!isSameOriginMutation(request)) return Response.json({ error: "forbidden" }, { status: 403 });

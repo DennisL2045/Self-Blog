@@ -1,6 +1,8 @@
 import { expiredStudioSessionCookie, isSameOriginMutation } from "../../../lib/studio-auth";
+import { hasStudioGatewayAccess, studioNotFoundResponse } from "../../../lib/studio-gateway";
 
 export async function POST(request: Request) {
+  if (!(await hasStudioGatewayAccess(request.headers))) return studioNotFoundResponse();
   if (!isSameOriginMutation(request)) return new Response("Forbidden", { status: 403 });
   const headers = new Headers({
     Location: new URL("/studio", request.url).toString(),

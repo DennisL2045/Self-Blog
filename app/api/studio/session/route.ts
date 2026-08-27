@@ -6,8 +6,10 @@ import {
   studioSessionCookie,
   verifyGoogleCredential,
 } from "../../../lib/studio-auth";
+import { hasStudioGatewayAccess, studioNotFoundResponse } from "../../../lib/studio-gateway";
 
 export async function GET(request: Request) {
+  if (!(await hasStudioGatewayAccess(request.headers))) return studioNotFoundResponse();
   const session = await getStudioSessionFromRequest(request);
   const headers = new Headers({ "Cache-Control": "no-store" });
   if (!session) headers.set("Set-Cookie", expiredStudioSessionCookie(request));
@@ -18,6 +20,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!(await hasStudioGatewayAccess(request.headers))) return studioNotFoundResponse();
   let error = "invalid";
   try {
     const form = await request.formData();

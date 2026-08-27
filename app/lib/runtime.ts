@@ -13,6 +13,9 @@ export type SiteRuntimeEnv = {
   GOOGLE_CLIENT_ID?: string;
   EDITOR_ALLOWED_EMAILS?: string;
   SESSION_SECRET?: string;
+  STUDIO_HOST?: string;
+  CF_ACCESS_TEAM_DOMAIN?: string;
+  CF_ACCESS_AUD?: string;
 };
 
 export function getRuntimeEnv(): SiteRuntimeEnv {

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 import { getStudioConfiguration, getStudioSession } from "../lib/studio-auth";
+import { hasStudioGatewayAccess } from "../lib/studio-gateway";
 import { listStudioPosts, type PostRecord } from "../lib/posts";
 import { StudioClient } from "./StudioClient";
 import { StudioLogin } from "./StudioLogin";
@@ -20,6 +22,9 @@ const errors: Record<string, string> = {
 };
 
 export default async function StudioPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const requestHeaders = await headers();
+  if (!(await hasStudioGatewayAccess(requestHeaders))) notFound();
+
   const config = getStudioConfiguration();
   const session = await getStudioSession();
   const error = errors[(await searchParams).error ?? ""];
@@ -29,7 +34,6 @@ export default async function StudioPage({ searchParams }: { searchParams: Promi
   }
 
   if (!session) {
-    const requestHeaders = await headers();
     const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
     const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
     const loginUri = `${protocol}://${host}/api/studio/session`;

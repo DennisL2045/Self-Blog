@@ -311,8 +311,8 @@ test("搜尋引擎可讀取公開網站規則與網站地圖", async () => {
   const [robots, sitemap] = await Promise.all([robotsResponse.text(), sitemapResponse.text()]);
   assert.match(robots, /Allow: \//);
   assert.match(robots, /Disallow: \/studio/);
-  assert.match(robots, /Sitemap: https:\/\/night-notes-cat\.songming1111\.chatgpt\.site\/sitemap\.xml/);
-  assert.match(sitemap, /<loc>https:\/\/night-notes-cat\.songming1111\.chatgpt\.site\/articles<\/loc>/);
+  assert.match(robots, /Sitemap: https:\/\/dennisnightnotes\.com\/sitemap\.xml/);
+  assert.match(sitemap, /<loc>https:\/\/dennisnightnotes\.com\/articles<\/loc>/);
   assert.doesNotMatch(sitemap, /\/studio/);
 });
 
@@ -398,4 +398,31 @@ test("文章內容與照片採安全輸出及版本保存", async () => {
   assert.match(collectionMigration, /ALTER TABLE `posts` ADD `tech_collection`/);
   assert.match(collectionMigration, /UPDATE `posts` SET `tech_collection`/);
   assert.match(collectionMigration, /'web-development'/);
+});
+
+test("studio is restricted to the private Cloudflare Access hostname", async () => {
+  const [gateway, runtime, page, sessionRoute, postsRoute, mediaRoute, logoutRoute, postRoute] = await Promise.all([
+    readFile(new URL("../app/lib/studio-gateway.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/runtime.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/studio/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/session/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/posts/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/media/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/logout/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/studio/posts/[id]/route.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(runtime, /STUDIO_HOST\?: string/);
+  assert.match(runtime, /CF_ACCESS_TEAM_DOMAIN\?: string/);
+  assert.match(runtime, /CF_ACCESS_AUD\?: string/);
+  assert.match(gateway, /cf-access-jwt-assertion/);
+  assert.match(gateway, /cdn-cgi\/access\/certs/);
+  assert.match(gateway, /actualHost !== expectedHost/);
+  assert.match(gateway, /allowedEmails\.has\(email\)/);
+  assert.match(page, /hasStudioGatewayAccess\(requestHeaders\)/);
+  assert.match(page, /notFound\(\)/);
+  for (const route of [sessionRoute, postsRoute, mediaRoute, logoutRoute, postRoute]) {
+    assert.match(route, /hasStudioGatewayAccess\(request\.headers\)/);
+    assert.match(route, /studioNotFoundResponse\(\)/);
+  }
 });
