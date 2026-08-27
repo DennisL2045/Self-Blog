@@ -162,6 +162,8 @@ test("技術分類卡片會開啟自己的文章列表", async () => {
   assert.match(webHtml, /Web 開發(?:<!-- -->)?文章/);
   assert.match(backendHtml, />後端與資料</);
   assert.match(techPage, /href=\{`\/tech\/\$\{category\.slug\}`\}/);
+  assert.match(techPage, /articleCounts\.get\(category\.slug\)/);
+  assert.match(techPage, /PublishedPostList posts=\{posts\}/);
   assert.match(collectionPage, /className="collection-hero"/);
   assert.match(collectionPage, /className="collection-article-heading"/);
   assert.match(posts, /AND tech_collection = \?/);
@@ -172,20 +174,50 @@ test("技術分類卡片會開啟自己的文章列表", async () => {
   assert.doesNotMatch(styles, /\.collection-article-list > div \{/);
 });
 
+test("公開文章清單只讀取列表所需欄位", async () => {
+  const [posts, publicPosts] = await Promise.all([
+    readFile(new URL("../app/lib/posts.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/public-posts.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(posts, /const summaryColumns = "id, slug, title, excerpt, category, tech_collection, topic, published_at, updated_at"/);
+  assert.match(posts, /listPublishedPostSummaries/);
+  assert.match(publicPosts, /safeListPublishedPostSummaries/);
+});
+
+test("公開頁面預熱站內連結並提供立即的跳轉回饋", async () => {
+  const [layout, speedup, worker, styles] = await Promise.all([
+    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/NavigationSpeedup.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(layout, /<NavigationSpeedup \/>/);
+  assert.match(speedup, /pointerover/);
+  assert.match(speedup, /fetch\(link\.href/);
+  assert.match(speedup, /route-changing/);
+  assert.match(worker, /s-maxage=60, stale-while-revalidate=300/);
+  assert.match(styles, /\.route-changing \.route-progress/);
+});
+
+test("技術分類不再顯示 Linux", async () => {
+  const tech = await readFile(new URL("../app/content/tech.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(tech, /Linux/);
+});
+
 test("全站套用指定字體並放寬首頁與技術版面", async () => {
   const [styles, layout] = await Promise.all([
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(styles, /@font-face[\s\S]*font-family: "jf-openhuninn"/);
-  assert.match(styles, /\/fonts\/jf-openhuninn-2\.1\.ttf/);
+  assert.match(styles, /\/fonts\/jf-openhuninn-2\.1\.woff2/);
   assert.match(styles, /\.hero \{ width: min\(1400px/);
   assert.match(styles, /\.tech-hero \{ width:min\(1320px/);
   assert.match(styles, /\.series-nav \{[^}]*gap:0/);
   assert.match(styles, /\.hero-copy h1[^}]*3\.15rem/);
   assert.match(styles, /\.published-reading > header h1[^}]*3\.35rem/);
   assert.match(styles, /body, body \*, body \*::before, body \*::after \{ font-family:var\(--site-font\) !important/);
-  assert.match(layout, /rel="preload"[^>]*jf-openhuninn-2\.1\.ttf/);
+  assert.match(layout, /rel="preload"[^>]*jf-openhuninn-2\.1\.woff2/);
 });
 
 test("上方導覽固定並放大主要閱讀文字", async () => {

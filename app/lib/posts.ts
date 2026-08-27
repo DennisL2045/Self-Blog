@@ -66,6 +66,23 @@ export type PostInput = {
   status: PostStatus;
 };
 
+export type PublishedPostSummaryRecord = Pick<
+  PostRecord,
+  "id" | "slug" | "title" | "excerpt" | "category" | "techCollection" | "topic" | "publishedAt" | "updatedAt"
+>;
+
+type PublishedPostSummaryRow = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  tech_collection: string | null;
+  topic: string;
+  published_at: string | null;
+  updated_at: string;
+};
+
 const SELECT_COLUMNS = `
   id, slug, title, excerpt, content, category, tech_collection, topic, status,
   author_google_sub, author_email, published_at, created_at, updated_at
@@ -92,6 +109,22 @@ function toPost(row: PostRow): PostRecord {
   };
 }
 
+function toPublishedPostSummary(row: PublishedPostSummaryRow): PublishedPostSummaryRecord {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    excerpt: row.excerpt,
+    category: row.category as PostCategory,
+    techCollection: techCollections.includes(row.tech_collection as TechCollection)
+      ? row.tech_collection as TechCollection
+      : row.category === "tech" ? defaultTechCollectionForTopic(row.topic) : null,
+    topic: row.topic as PostTopic,
+    publishedAt: row.published_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export async function listStudioPosts(): Promise<PostRecord[]> {
   const result = await getD1()
     .prepare(`SELECT ${SELECT_COLUMNS} FROM posts ORDER BY updated_at DESC LIMIT 100`)
@@ -113,6 +146,26 @@ export async function listPublishedPosts(category?: PostCategory, limit = 30, te
 export async function safeListPublishedPosts(category?: PostCategory, limit = 30, techCollection?: TechCollection): Promise<PostRecord[]> {
   try {
     return await listPublishedPosts(category, limit, techCollection);
+  } catch {
+    return [];
+  }
+}
+
+export async function listPublishedPostSummaries(category?: PostCategory, limit = 30, techCollection?: TechCollection): Promise<PublishedPostSummaryRecord[]> {
+  const database = getD1();
+  const summaryColumns = "id, slug, title, excerpt, category, tech_collection, topic, published_at, updated_at";
+  const statement = category === "tech" && techCollection
+    ? database.prepare(`SELECT ${summaryColumns} FROM posts WHERE status = 'published' AND category = 'tech' AND tech_collection = ? ORDER BY published_at DESC LIMIT ?`).bind(techCollection, limit)
+    : category
+    ? database.prepare(`SELECT ${summaryColumns} FROM posts WHERE status = 'published' AND category = ? ORDER BY published_at DESC LIMIT ?`).bind(category, limit)
+    : database.prepare(`SELECT ${summaryColumns} FROM posts WHERE status = 'published' ORDER BY published_at DESC LIMIT ?`).bind(limit);
+  const result = await statement.all<PublishedPostSummaryRow>();
+  return result.results.map(toPublishedPostSummary);
+}
+
+export async function safeListPublishedPostSummaries(category?: PostCategory, limit = 30, techCollection?: TechCollection): Promise<PublishedPostSummaryRecord[]> {
+  try {
+    return await listPublishedPostSummaries(category, limit, techCollection);
   } catch {
     return [];
   }

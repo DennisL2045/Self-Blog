@@ -54,7 +54,7 @@ export const techCategories = [
     name: "系統與維運",
     english: "Systems & operations",
     summary: "從作業系統與網路出發，延伸到容器、部署、監控及排錯。",
-    topics: ["Linux", "網路", "Docker", "Kubernetes", "CI/CD"],
+    topics: ["網路", "Docker", "Kubernetes", "CI/CD"],
   },
   {
     slug: "ai-engineering",

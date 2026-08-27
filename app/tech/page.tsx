@@ -1,11 +1,18 @@
 import { TopBar } from "../TopBar";
-import { LivePublishedPosts } from "../components/LivePublishedPosts";
+import { PublishedPostList } from "../components/PublishedPostList";
 import { SeriesNav } from "../components/SeriesNav";
 import { techCategories } from "../content/tech";
+import { listPublicPostSummaries } from "../lib/public-posts";
 
 export const dynamic = "force-dynamic";
 
-export default function TechPage() {
+export default async function TechPage() {
+  const posts = await listPublicPostSummaries("tech", 50);
+  const articleCounts = new Map<string, number>();
+  for (const post of posts) {
+    if (post.techCollection) articleCounts.set(post.techCollection, (articleCounts.get(post.techCollection) ?? 0) + 1);
+  }
+
   return (
     <main className="inner-page tech-page">
       <TopBar />
@@ -23,7 +30,7 @@ export default function TechPage() {
             <h2>{category.name}</h2>
             <div>{category.summary}</div>
             <ul>{category.topics.map((topic) => <li key={topic}>{topic}</li>)}</ul>
-            <b>查看分類文章 →</b>
+            <b>{articleCounts.get(category.slug) ? `查看 ${articleCounts.get(category.slug)} 篇文章` : "查看文章列表"} →</b>
           </a>
         ))}
         <a className="quick-look-entry" href="/tech/quick-look">
@@ -32,7 +39,7 @@ export default function TechPage() {
           <b>打開名詞小冊 ↗</b>
         </a>
       </section>
-      <section className="published-tech"><div><p>Growing library</p><h2>技術札記</h2></div><LivePublishedPosts category="tech" emptyText="第一篇技術文章準備中。發布後會依主題顯示在這裡。" /></section>
+      <section className="published-tech"><div><p>Growing library</p><h2>技術札記</h2></div><PublishedPostList posts={posts} emptyText="第一篇技術文章準備中。發布後會依主題顯示在這裡。" /></section>
     </main>
   );
 }

@@ -1,8 +1,8 @@
 import { headers } from "next/headers";
-import type { PostCategory, PostRecord, TechCollection } from "./posts";
+import type { PostCategory, PublishedPostSummaryRecord, TechCollection } from "./posts";
 import { siteUrl } from "./site";
 
-export type PublishedPostSummary = Pick<PostRecord, "id" | "slug" | "title" | "excerpt" | "category" | "techCollection" | "topic" | "publishedAt" | "updatedAt">;
+export type PublishedPostSummary = PublishedPostSummaryRecord;
 
 export async function listPublicPostSummaries(category?: PostCategory, limit = 50, techCollection?: TechCollection): Promise<PublishedPostSummary[]> {
   try {
@@ -13,19 +13,8 @@ export async function listPublicPostSummaries(category?: PostCategory, limit = 5
     const canonicalHost = new URL(siteUrl).host;
     const isLocal = host?.startsWith("localhost") || host?.startsWith("127.0.0.1");
     if (isLocal || host !== canonicalHost) return [];
-    const { safeListPublishedPosts } = await import("./posts");
-    const posts = await safeListPublishedPosts(category, limit, techCollection);
-    return posts.map(({ id, slug, title, excerpt, category: postCategory, techCollection: postTechCollection, topic, publishedAt, updatedAt }) => ({
-      id,
-      slug,
-      title,
-      excerpt,
-      category: postCategory,
-      techCollection: postTechCollection,
-      topic,
-      publishedAt,
-      updatedAt,
-    }));
+    const { safeListPublishedPostSummaries } = await import("./posts");
+    return safeListPublishedPostSummaries(category, limit, techCollection);
   } catch {
     return [];
   }

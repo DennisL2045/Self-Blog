@@ -41,9 +41,31 @@ const worker = {
       return withSecurityHeaders(request, response);
     }
 
-    return withSecurityHeaders(request, await handler.fetch(request, env, ctx));
+    const edgeCache = (globalThis as typeof globalThis & { caches?: CacheStorage & { default?: Cache } }).caches?.default;
+    const cacheableDocument = edgeCache && isCacheablePublicDocument(request);
+    const cacheKey = cacheableDocument ? new Request(url.toString(), { headers: { Accept: "text/html" } }) : null;
+    if (edgeCache && cacheKey) {
+      const cached = await edgeCache.match(cacheKey);
+      if (cached) return cached;
+    }
+
+    const response = withSecurityHeaders(request, await handler.fetch(request, env, ctx));
+    if (!edgeCache || !cacheKey || response.status !== 200 || response.headers.has("Set-Cookie")) return response;
+
+    const headers = new Headers(response.headers);
+    headers.set("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=300");
+    const cacheableResponse = new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+    ctx.waitUntil(edgeCache.put(cacheKey, cacheableResponse.clone()));
+    return cacheableResponse;
   },
 };
+
+function isCacheablePublicDocument(request: Request) {
+  if (request.method !== "GET" || request.headers.get("RSC") === "1") return false;
+  const pathname = new URL(request.url).pathname;
+  if (pathname === "/studio" || pathname.startsWith("/api/") || pathname.startsWith("/media/") || pathname.startsWith("/_next/")) return false;
+  return request.headers.get("Accept")?.includes("text/html") ?? false;
+}
 
 function withSecurityHeaders(request: Request, response: Response) {
   const headers = new Headers(response.headers);
