@@ -41,22 +41,12 @@ const worker = {
       return withSecurityHeaders(request, response);
     }
 
-    const edgeCache = (globalThis as typeof globalThis & { caches?: CacheStorage & { default?: Cache } }).caches?.default;
-    const cacheableDocument = edgeCache && isCacheablePublicDocument(request);
-    const cacheKey = cacheableDocument ? new Request(url.toString(), { headers: { Accept: "text/html" } }) : null;
-    if (edgeCache && cacheKey) {
-      const cached = await edgeCache.match(cacheKey);
-      if (cached) return cached;
-    }
-
     const response = withSecurityHeaders(request, await handler.fetch(request, env, ctx));
-    if (!edgeCache || !cacheKey || response.status !== 200 || response.headers.has("Set-Cookie")) return response;
+    if (!isCacheablePublicDocument(request) || response.status !== 200 || response.headers.has("Set-Cookie")) return response;
 
     const headers = new Headers(response.headers);
     headers.set("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=300");
-    const cacheableResponse = new Response(response.body, { status: response.status, statusText: response.statusText, headers });
-    ctx.waitUntil(edgeCache.put(cacheKey, cacheableResponse.clone()));
-    return cacheableResponse;
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   },
 };
 
