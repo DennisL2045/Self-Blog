@@ -111,6 +111,22 @@ test("第一篇 JavaScript 寫作範本包含分類、主題與程式碼示範",
   assert.match(codeBlock, /複製程式碼/);
 });
 
+test("編輯室可以新增並重複使用自訂主題", async () => {
+  const [editor, taxonomy, posts] = await Promise.all([
+    readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/post-taxonomy.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/posts.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(editor, /＋ 新增自訂主題/);
+  assert.match(editor, /studioTopicsForCategory\(draft\.category, posts\)/);
+  assert.match(editor, /maxLength=\{40\}/);
+  assert.match(editor, /請先輸入自訂主題名稱/);
+  assert.match(taxonomy, /export type PostTopic = string/);
+  assert.match(taxonomy, /return topic \|\| "其他"/);
+  assert.match(posts, /function topicValue/);
+  assert.doesNotMatch(posts, /postTopics\.includes\(payload\.topic/);
+});
+
 test("編輯室右側可直接改文並使用獨立滾動區", async () => {
   const [editor, styles] = await Promise.all([
     readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),

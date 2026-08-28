@@ -302,6 +302,9 @@ body, body *, body *::before, body *::after { font-family:var(--site-font) !impo
 .studio-field-help { display:block; margin-top:7px; color:#777781; font-size:.66rem; line-height:1.5; }
 .studio-destination { min-height:44px; padding:12px 13px; display:block; border:1px solid #3d414c; color:#d6d0c8; background:#1d2029; font-size:.82rem; }
 .studio-destination b { padding:0 7px; color:#c98d70; }
+.studio-topic-field > label { display:block; margin-bottom:0; }
+.studio-topic-field > .studio-custom-topic { margin-top:12px; }
+.studio-topic-field > .studio-custom-topic span { color:#c79568; }
 .studio-welcome { max-width:560px; padding:35px; }
 .studio-welcome > div { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; }
 .studio-welcome button.secondary { border-color:#555965; background:transparent; color:#ddd7ce; }

@@ -31,6 +31,7 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [templateId, setTemplateId] = useState(editorTemplates[0]?.id ?? "");
+  const [addingCustomTopic, setAddingCustomTopic] = useState(false);
   const [previewMode, setPreviewMode] = useState<"preview" | "edit">("preview");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewBodyRef = useRef<HTMLDivElement>(null);
@@ -92,6 +93,7 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
   function choose(post: PostRecord) {
     if (dirty && !window.confirm("目前修改尚未儲存，仍要切換文章嗎？")) return;
     setDraft({ ...post });
+    setAddingCustomTopic(false);
     setDirty(false);
     setMessage("");
   }
@@ -133,6 +135,7 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
   function changeCategory(category: PostCategory) {
     if (!draft) return;
     setDraft({ ...draft, category, techCollection: category === "tech" ? "web-development" : null, topic: defaultTopicForCategory(category) });
+    setAddingCustomTopic(false);
     setDirty(true);
   }
 
@@ -159,6 +162,7 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
       topic: template.topic,
       status: "draft",
     });
+    setAddingCustomTopic(false);
     setDirty(true);
     setMessage("範本已放入目前草稿；內容尚未儲存，也不會自動發布。" );
   }
@@ -185,6 +189,10 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
 
   async function save(nextStatus?: PostStatus) {
     if (!draft) return;
+    if (!draft.topic.trim()) {
+      setMessage("請先輸入自訂主題名稱。");
+      return;
+    }
     setBusy(true);
     setMessage("");
     try {
@@ -199,6 +207,7 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
       if (!response.ok || !data.post) throw new Error(data.error ?? "儲存失敗");
       setPosts((current) => current.map((post) => post.id === data.post!.id ? data.post! : post).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)));
       setDraft(data.post);
+      setAddingCustomTopic(false);
       setDirty(false);
       setMessage(nextStatus === "published" ? "文章已發布。" : "變更已安全儲存。" );
     } catch (error) {
@@ -264,6 +273,8 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
     }
   }
 
+  const availableTopics = draft ? studioTopicsForCategory(draft.category, posts) : [];
+
   return (
     <div className="studio-shell">
       <header className="studio-header">
@@ -298,7 +309,18 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
               <div className={`studio-field-row studio-taxonomy-row ${draft.category === "tech" ? "has-tech-collection" : ""}`}>
                 <label><span>文章書架</span><select value={draft.category} onChange={(event) => changeCategory(event.target.value as PostCategory)}>{Object.entries(postTaxonomy).map(([value, item]) => <option value={value} key={value}>{item.label}</option>)}</select><small className="studio-field-help">發布後會流向這個公開區塊。</small></label>
                 {draft.category === "tech" ? <label><span>技術子分類</span><select value={draft.techCollection ?? "web-development"} onChange={(event) => changeTechCollection(event.target.value as TechCollection)}>{techCategories.map((collection) => <option value={collection.slug} key={collection.slug}>{collection.name}</option>)}</select><small className="studio-field-help">決定文章會出現在哪一張技術分類卡片裡。</small></label> : null}
-                <label><span>主題類型</span><select value={draft.topic} onChange={(event) => change("topic", event.target.value as PostRecord["topic"])}>{topicsForCategory(draft.category).map((topic) => <option value={topic.value} key={topic.value}>{topic.label}</option>)}</select><small className="studio-field-help">用來標示文章的具體技術或內容主題。</small></label>
+                <div className="studio-topic-field">
+                  <label><span>主題類型</span><select value={addingCustomTopic ? "__custom__" : draft.topic} onChange={(event) => {
+                    if (event.target.value === "__custom__") {
+                      change("topic", "");
+                      setAddingCustomTopic(true);
+                    } else {
+                      change("topic", event.target.value);
+                      setAddingCustomTopic(false);
+                    }
+                  }}>{availableTopics.map((topic) => <option value={topic.value} key={topic.value}>{topic.label}</option>)}<option value="__custom__">＋ 新增自訂主題</option></select></label>
+                  {addingCustomTopic ? <label className="studio-custom-topic"><span>自訂主題名稱</span><input value={draft.topic} onChange={(event) => change("topic", event.target.value)} maxLength={40} placeholder="例如：Node.js、資安筆記" autoFocus /></label> : <small className="studio-field-help">可以選擇既有主題，或新增自己的主題名稱。</small>}
+                </div>
               </div>
               <div className="studio-field-row studio-field-row-wide">
                 <label><span>網址代稱</span><input value={draft.slug} onChange={(event) => change("slug", event.target.value)} placeholder="留白會自動產生" maxLength={80} /></label>
@@ -353,6 +375,18 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
 
 function statusLabel(status: PostStatus) {
   return status === "published" ? "已發布" : status === "archived" ? "已封存" : "草稿";
+}
+
+function studioTopicsForCategory(category: PostCategory, posts: PostRecord[]) {
+  const topics = topicsForCategory(category).map((topic) => ({ ...topic }));
+  const known = new Set(topics.map((topic) => topic.value));
+  for (const post of posts) {
+    const value = post.topic.trim();
+    if (post.category !== category || !value || known.has(value)) continue;
+    topics.push({ value, label: topicLabel(value) });
+    known.add(value);
+  }
+  return topics;
 }
 
 function codeFenceLanguage(topic: PostRecord["topic"]) {

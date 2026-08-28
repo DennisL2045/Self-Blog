@@ -8,8 +8,6 @@ import {
 import {
   defaultTopicForCategory,
   postCategories,
-  postTopics,
-  topicBelongsToCategory,
   type PostCategory,
   type PostTopic,
 } from "./post-taxonomy";
@@ -297,12 +295,7 @@ export function normalizePostInput(value: unknown, fallback?: Partial<PostInput>
   const category = postCategories.includes(payload.category as PostCategory)
     ? payload.category as PostCategory
     : fallback?.category ?? "tech";
-  const requestedTopic = postTopics.includes(payload.topic as PostTopic)
-    ? payload.topic as PostTopic
-    : fallback?.topic;
-  const topic = requestedTopic && topicBelongsToCategory(category, requestedTopic)
-    ? requestedTopic
-    : defaultTopicForCategory(category);
+  const topic = topicValue(payload.topic, fallback?.topic ?? defaultTopicForCategory(category));
   const requestedTechCollection = techCollections.includes(payload.techCollection as TechCollection)
     ? payload.techCollection as TechCollection
     : fallback?.techCollection;
@@ -324,6 +317,14 @@ function textValue(value: unknown, fallback: string, maxLength: number, trim = t
   const text = typeof value === "string" ? value : fallback;
   if (text.length > maxLength) throw new Error(`欄位內容超過 ${maxLength} 字元`);
   return trim ? text.trim() : text;
+}
+
+function topicValue(value: unknown, fallback: string) {
+  const topic = textValue(value, fallback, 40)
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return topic || fallback;
 }
 
 function normalizeSlug(value: string) {

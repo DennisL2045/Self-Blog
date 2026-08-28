@@ -45,7 +45,7 @@ export const postTaxonomy = {
 } as const;
 
 export type PostCategory = keyof typeof postTaxonomy;
-export type PostTopic = (typeof postTaxonomy)[PostCategory]["topics"][number]["value"];
+export type PostTopic = string;
 
 export const postCategories = Object.keys(postTaxonomy) as PostCategory[];
 export const postTopics = Object.values(postTaxonomy).flatMap((category) => category.topics.map((topic) => topic.value)) as PostTopic[];
@@ -55,7 +55,7 @@ export function categoryLabel(category: PostCategory) {
 }
 
 export function topicsForCategory(category: PostCategory) {
-  return postTaxonomy[category].topics as readonly { value: PostTopic; label: string }[];
+  return postTaxonomy[category].topics as readonly { value: string; label: string }[];
 }
 
 export function defaultTopicForCategory(category: PostCategory): PostTopic {
@@ -71,5 +71,5 @@ export function topicLabel(topic: PostTopic) {
     const match = category.topics.find((item) => item.value === topic);
     if (match) return match.label;
   }
-  return "其他";
+  return topic || "其他";
 }
