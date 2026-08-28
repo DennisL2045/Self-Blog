@@ -292,6 +292,13 @@ test("平板與手機使用置中貓咪與漢堡選單", async () => {
   assert.match(styles, /@media \(max-width:520px\)[\s\S]*?\.inner-nav \{ left:12px; right:12px; width:auto; grid-template-columns:1fr/);
 });
 
+test("手機文章系列使用完整可見的二加三排列", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(css, /\.series-nav \{ display:grid; grid-template-columns:repeat\(6,minmax\(0,1fr\)\); overflow:visible; \}/);
+  assert.match(css, /\.series-nav a:nth-child\(-n\+2\) \{ grid-column:span 3;/);
+  assert.match(css, /\.series-nav a:nth-child\(n\+3\) \{ grid-column:span 2;/);
+});
+
 test("首頁與內頁黑貓維持自然趴姿、全黑耳朵與柔和尾巴", async () => {
   const [catWindow, topbar, styles] = await Promise.all([
     readFile(new URL("../app/CatWindow.tsx", import.meta.url), "utf8"),
