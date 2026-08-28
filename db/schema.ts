@@ -62,3 +62,18 @@ export const mediaAssets = sqliteTable(
     index("idx_media_assets_post_id").on(table.postId),
   ],
 );
+
+export const contactRateLimits = sqliteTable(
+  "contact_rate_limits",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    fingerprint: text("fingerprint").notNull(),
+    emailHash: text("email_hash").notNull(),
+    createdAt: integer("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_contact_rate_limits_fingerprint_created_at").on(table.fingerprint, table.createdAt),
+    index("idx_contact_rate_limits_email_hash_created_at").on(table.emailHash, table.createdAt),
+    index("idx_contact_rate_limits_created_at").on(table.createdAt),
+  ],
+);

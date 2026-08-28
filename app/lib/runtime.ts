@@ -16,6 +16,9 @@ export type SiteRuntimeEnv = {
   STUDIO_HOST?: string;
   CF_ACCESS_TEAM_DOMAIN?: string;
   CF_ACCESS_AUD?: string;
+  RESEND_API_KEY?: string;
+  CONTACT_TO_EMAIL?: string;
+  CONTACT_FROM_EMAIL?: string;
 };
 
 export function getRuntimeEnv(): SiteRuntimeEnv {

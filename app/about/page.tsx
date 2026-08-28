@@ -1,4 +1,5 @@
 import { TopBar } from "../TopBar";
+import { ContactForm } from "./ContactForm";
 
 export default function AboutPage() {
   return (
@@ -11,7 +12,7 @@ export default function AboutPage() {
           <div>
             <p>夜行手札不追趕更新頻率，也不把理解壓縮成標準答案。</p>
             <p>這裡會慢慢收進程式概念、專案經驗與旅途記錄。希望每篇內容都保留脈絡與實際使用情境，讓日後回來閱讀時，仍能接續當時的思考。</p>
-            <p id="contact"><strong>聯絡我</strong><br />公開聯絡信箱準備好後會放在這裡，不會使用範本或私人帳號代替。</p>
+            <ContactForm />
           </div>
         </div>
       </section>

@@ -16,7 +16,7 @@ export default function ArticlesPage() {
     <main className="inner-page articles-page">
       <TopBar />
       <section className="inner-content">
-        <header className="inner-heading"><p>All published writing</p><h1>文章總覽</h1><span>從一個總入口前往各個系列；只有正式發布的文章才會出現在公開書架。</span></header>
+        <header className="inner-heading"><p>All published writing</p><h1>文章總覽</h1><span>期許會有一篇你想要看的。</span></header>
         <SeriesNav current="all" />
         <section className="article-hub-list" aria-labelledby="all-articles-title">
           <div className="article-hub-heading"><p>Latest archive</p><h2 id="all-articles-title">全部文章</h2><span>按照發布時間排列，從最近寫下的內容開始閱讀。</span></div>

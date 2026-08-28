@@ -64,6 +64,30 @@ test("簡單看看頁整理工具名詞與使用情境", async () => {
   assert.match(html, />Docker</);
   assert.match(html, />Redis</);
   assert.match(html, /常見使用情境/);
+  assert.match(html, /先知道它解決什麼問題。/);
+  assert.doesNotMatch(html, /以及通常在哪裡出現|怎麼使用這一區/);
+});
+
+test("聯絡頁只顯示表單，收件地址留在伺服器密鑰", async () => {
+  const [html, route, runtime, envExample] = await Promise.all([
+    renderHtml("/about"),
+    readFile(new URL("../app/api/contact/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/runtime.ts", import.meta.url), "utf8"),
+    readFile(new URL("../.env.example", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(html, />聯絡我</);
+  assert.match(html, /name="name"/);
+  assert.match(html, /name="email"/);
+  assert.match(html, /name="message"/);
+  assert.doesNotMatch(html, /mailto:|@gmail\.com/);
+  assert.match(route, /runtime\.CONTACT_TO_EMAIL/);
+  assert.match(route, /runtime\.RESEND_API_KEY/);
+  assert.match(route, /contact_rate_limits/);
+  assert.match(route, /origin !== requestUrl\.origin/);
+  assert.match(runtime, /CONTACT_TO_EMAIL\?: string/);
+  assert.match(envExample, /CONTACT_TO_EMAIL=\r?\n/);
+  assert.doesNotMatch(envExample, /@gmail\.com/);
 });
 
 test("第一篇 JavaScript 寫作範本包含分類、主題與程式碼示範", async () => {
