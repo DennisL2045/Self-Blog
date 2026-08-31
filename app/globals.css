@@ -20,7 +20,7 @@ a { color: inherit; text-decoration: none; }
 .wordmark { display:inline-flex; align-items:center; gap:12px; font-size:1.08rem; font-weight:700; }
 .wordmark-text { display:inline-flex; align-items:baseline; gap:10px; }
 .wordmark-text small { color:#736f68; font:italic .72rem Georgia,serif; font-weight:400; }
-.doodle-moon { --moon-cutout:#101525; position:relative; display:inline-block; width:1em; height:1em; overflow:hidden; border-radius:51% 49% 50% 50% / 49% 51% 49% 51%; background:radial-gradient(ellipse at 49% 51%,transparent 0 37%,rgba(116,78,44,.17) 39% 41%,transparent 43%),radial-gradient(circle at 24% 58%,rgba(255,241,196,.22) 0 1.5%,transparent 2.4%),#e4bd70; box-shadow:inset .025em -.02em 0 rgba(113,75,40,.14); transform:rotate(-8deg); }
+.doodle-moon { --moon-cutout:#101525; position:relative; display:inline-block; width:1em; height:1em; overflow:hidden; border-radius:51% 49% 50% 50% / 49% 51% 49% 51%; background:radial-gradient(circle at 24% 58%,rgba(255,241,196,.22) 0 1.5%,transparent 2.4%),#e4bd70; box-shadow:inset .025em -.02em 0 rgba(113,75,40,.14); transform:rotate(-8deg); }
 .doodle-moon::after { content:""; position:absolute; width:95%; height:95%; left:30%; top:-7%; border-radius:50%; background:var(--moon-cutout); transform:rotate(-2deg); }
 .brand-mark { position:relative; width:36px; height:36px; flex:0 0 36px; display:grid; place-items:center; overflow:hidden; background:#101525; border-radius:7px; box-shadow:inset 0 0 0 1px rgba(243,234,217,.12); }
 .brand-mark .doodle-moon { width:22px; height:24px; }
