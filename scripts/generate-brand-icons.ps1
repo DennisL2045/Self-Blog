@@ -19,27 +19,28 @@ function New-NightNotesIcon {
   $graphics.Clear($night)
 
   $moonBrush = New-Object System.Drawing.SolidBrush($moon)
-  $moonPath = New-Object System.Drawing.Drawing2D.GraphicsPath
-  $moonPath.StartFigure()
-  $moonPath.AddBezier(($Size * .70), ($Size * .17), ($Size * .44), ($Size * .15), ($Size * .29), ($Size * .34), ($Size * .30), ($Size * .53))
-  $moonPath.AddBezier(($Size * .30), ($Size * .53), ($Size * .31), ($Size * .74), ($Size * .49), ($Size * .86), ($Size * .74), ($Size * .79))
-  $moonPath.AddBezier(($Size * .74), ($Size * .79), ($Size * .55), ($Size * .73), ($Size * .49), ($Size * .61), ($Size * .50), ($Size * .49))
-  $moonPath.AddBezier(($Size * .50), ($Size * .49), ($Size * .51), ($Size * .35), ($Size * .58), ($Size * .24), ($Size * .70), ($Size * .17))
-  $moonPath.CloseFigure()
-  $graphics.FillPath($moonBrush, $moonPath)
+  $nightBrush = New-Object System.Drawing.SolidBrush($night)
+  $outerPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  $innerPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  $outerPath.AddEllipse(($Size * .17), ($Size * .16), ($Size * .66), ($Size * .68))
+  $innerPath.AddEllipse(($Size * .36), ($Size * .10), ($Size * .65), ($Size * .67))
+  $graphics.FillPath($moonBrush, $outerPath)
 
-  $graphics.SetClip($moonPath)
+  $graphics.SetClip($outerPath)
   $strokeColor = [System.Drawing.Color]::FromArgb(58, 116, 78, 43)
   $strokePen = New-Object System.Drawing.Pen($strokeColor, [Math]::Max(1, ($Size * .009)))
-  $graphics.DrawBezier($strokePen, ($Size * .35), ($Size * .35), ($Size * .31), ($Size * .47), ($Size * .38), ($Size * .64), ($Size * .52), ($Size * .73))
-  $graphics.DrawBezier($strokePen, ($Size * .39), ($Size * .27), ($Size * .34), ($Size * .43), ($Size * .42), ($Size * .57), ($Size * .55), ($Size * .67))
+  $graphics.DrawArc($strokePen, ($Size * .20), ($Size * .19), ($Size * .60), ($Size * .62), 105, 150)
+  $graphics.DrawArc($strokePen, ($Size * .24), ($Size * .23), ($Size * .54), ($Size * .55), 108, 145)
   $graphics.ResetClip()
+  $graphics.FillPath($nightBrush, $innerPath)
 
   $target = Join-Path $publicDir $FileName
   $bitmap.Save($target, [System.Drawing.Imaging.ImageFormat]::Png)
 
   $strokePen.Dispose()
-  $moonPath.Dispose()
+  $innerPath.Dispose()
+  $outerPath.Dispose()
+  $nightBrush.Dispose()
   $moonBrush.Dispose()
   $graphics.Dispose()
   $bitmap.Dispose()
