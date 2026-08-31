@@ -1,13 +1,17 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 type SubmitState = "idle" | "sending" | "success" | "error";
 
 export function ContactForm() {
-  const startedAt = useRef(Date.now());
+  const startedAt = useRef(0);
   const [state, setState] = useState<SubmitState>("idle");
   const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

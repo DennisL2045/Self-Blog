@@ -319,11 +319,11 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
                       setAddingCustomTopic(false);
                     }
                   }}>{availableTopics.map((topic) => <option value={topic.value} key={topic.value}>{topic.label}</option>)}<option value="__custom__">＋ 新增自訂主題</option></select></label>
-                  {addingCustomTopic ? <label className="studio-custom-topic"><span>自訂主題名稱</span><input value={draft.topic} onChange={(event) => change("topic", event.target.value)} maxLength={40} placeholder="例如：Node.js、資安筆記" autoFocus /></label> : <small className="studio-field-help">可以選擇既有主題，或新增自己的主題名稱。</small>}
+                  {addingCustomTopic ? <label className="studio-custom-topic"><span>自訂主題名稱</span><input value={draft.topic} onChange={(event) => change("topic", event.target.value)} maxLength={40} placeholder="例如：Node.js、資安筆記" /></label> : <small className="studio-field-help">可以選擇既有主題，或新增自己的主題名稱。</small>}
                 </div>
               </div>
               <div className="studio-field-row studio-field-row-wide">
-                <label><span>網址代稱</span><input value={draft.slug} onChange={(event) => change("slug", event.target.value)} placeholder="留白會自動產生" maxLength={80} /></label>
+                  <label><span>網址代稱</span><input value={draft.slug} onChange={(event) => change("slug", event.target.value)} placeholder="例如：javascript-closure" maxLength={80} /><small className="studio-field-help">建議使用簡短英文關鍵字；正式發布後盡量不要更改，以免舊連結失效。</small></label>
                 <label><span>目前流向</span><output className="studio-destination">{categoryLabel(draft.category)} {draft.techCollection ? <><b>→</b> {techCollectionLabel(draft.techCollection)}</> : null} <b>→</b> {topicLabel(draft.topic)}</output></label>
               </div>
               <label><span>文章摘要</span><textarea className="studio-excerpt" value={draft.excerpt} onChange={(event) => change("excerpt", event.target.value)} maxLength={500} /></label>

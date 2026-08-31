@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       from,
       to: [to],
       reply_to: email,
-      subject: `夜行手札網站留言｜${safeName}`,
+      subject: `夜行手記網站留言｜${safeName}`,
       text: `稱呼：${name}\n回覆信箱：${email}\n\n想說的話：\n${message}`,
     }),
   });

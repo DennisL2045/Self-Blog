@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import { TopBar } from "../TopBar";
 import { LivePublishedPosts } from "../components/LivePublishedPosts";
 import { SeriesNav } from "../components/SeriesNav";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "出遊手札｜旅行、跑步與生活記錄｜夜行手記",
+  description: "Dennis 的旅行、跑步與生活記錄，以地點、日期、照片和旅途中的細小感受整理每段路程。",
+  alternates: { canonical: "/travel" },
+};
 
 export default function TravelPage() {
   return (

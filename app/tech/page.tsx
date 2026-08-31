@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { TopBar } from "../TopBar";
 import { PaginatedPostList } from "../components/PaginatedPostList";
 import { SeriesNav } from "../components/SeriesNav";
@@ -5,6 +6,12 @@ import { techCategories } from "../content/tech";
 import { listPublicPostSummaries } from "../lib/public-posts";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "技術成長｜JavaScript、前後端與系統開發筆記｜夜行手記",
+  description: "Dennis 的技術成長筆記，整理 JavaScript、Web 前端、後端資料、程式設計、系統維運與 AI 工程的概念與實作。",
+  alternates: { canonical: "/tech" },
+};
 
 export default async function TechPage() {
   const posts = await listPublicPostSummaries("tech", 50);

@@ -1,5 +1,6 @@
 import { listPublicPostSummaries } from "../lib/public-posts";
 import { topicLabel } from "../lib/post-taxonomy";
+import { publicPostExcerpt } from "../lib/seo";
 
 type HomeNote = { date: string; tag: string; title: string; excerpt: string; href: string };
 
@@ -9,7 +10,7 @@ export async function HomeLatestNotes() {
     date: new Intl.DateTimeFormat("zh-TW", { month: "2-digit", day: "2-digit" }).format(new Date(post.publishedAt ?? post.updatedAt)),
     tag: topicLabel(post.topic),
     title: post.title,
-    excerpt: post.excerpt,
+    excerpt: publicPostExcerpt(post),
     href: `/notes/${post.slug}`,
   }));
 

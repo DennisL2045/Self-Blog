@@ -18,7 +18,7 @@ export function TopBar() {
 
   return (
     <header className="inner-topbar" onPointerMove={(event) => look(event.clientX, event.clientY)}>
-      <a className="inner-brand" href="/">夜行手札</a>
+      <a className="inner-brand" href="/" aria-label="夜行手記首頁">夜行手記</a>
       <nav
         id="inner-navigation"
         className={`inner-nav ${menuOpen ? "open" : ""}`}

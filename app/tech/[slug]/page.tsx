@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { TopBar } from "../../TopBar";
 import { PaginatedPostList } from "../../components/PaginatedPostList";
 import { SeriesNav } from "../../components/SeriesNav";
 import { getTechArticle, getTechCategory, techArticles, techCategories } from "../../content/tech";
 import { listPublicPostSummaries } from "../../lib/public-posts";
+import { siteName } from "../../lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -14,9 +16,17 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const slug = (await params).slug;
   const category = getTechCategory(slug);
-  if (category) return { title: `${category.name}｜技術成長｜夜行手札`, description: category.summary, alternates: { canonical: `/tech/${category.slug}` } };
+  if (category) {
+    const posts = await listPublicPostSummaries("tech", 1, category.slug);
+    return {
+      title: `${category.name}｜技術成長｜${siteName}`,
+      description: `${category.summary}收錄 ${category.topics.join("、")}等主題的概念整理與實作筆記。`,
+      alternates: { canonical: `/tech/${category.slug}` },
+      robots: posts.length ? undefined : { index: false, follow: true },
+    };
+  }
   const article = getTechArticle(slug);
-  return article ? { title: `${article.title}｜夜行手札`, description: article.summary } : { title: "找不到札記｜夜行手札" };
+  return article ? { title: `${article.title}｜${siteName}`, description: article.summary } : { title: `找不到文章｜${siteName}`, robots: { index: false, follow: true } };
 }
 
 export default async function TechArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -47,7 +57,7 @@ export default async function TechArticlePage({ params }: { params: Promise<{ sl
   }
 
   const article = getTechArticle(slug);
-  if (!article) return <main className="inner-page"><TopBar /><section className="article-missing"><p>這篇札記暫時不在書架上。</p><a href="/tech">回到技術成長</a></section></main>;
+  if (!article) notFound();
 
   return (
     <main className="inner-page tech-reading-page">

@@ -6,8 +6,8 @@ import { SeriesNav } from "../components/SeriesNav";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "文章總覽｜夜行手札",
-  description: "依技術成長、簡單看看、個人經歷與出遊手札整理所有公開文章。",
+  title: "文章總覽｜夜行手記",
+  description: "瀏覽夜行手記的所有公開文章，依技術成長、工具名詞、個人經歷與出遊手札分門整理。",
   alternates: { canonical: "/articles" },
 };
 

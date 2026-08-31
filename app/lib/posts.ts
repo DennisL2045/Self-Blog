@@ -320,8 +320,11 @@ function textValue(value: unknown, fallback: string, maxLength: number, trim = t
 }
 
 function topicValue(value: unknown, fallback: string) {
-  const topic = textValue(value, fallback, 40)
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
+  const sanitized = Array.from(textValue(value, fallback, 40), (character) => {
+    const code = character.charCodeAt(0);
+    return code <= 31 || code === 127 ? " " : character;
+  }).join("");
+  const topic = sanitized
     .replace(/\s+/g, " ")
     .trim();
   return topic || fallback;

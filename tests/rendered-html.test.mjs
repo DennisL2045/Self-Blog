@@ -33,7 +33,11 @@ async function renderHtml(pathname) {
 test("首頁呈現四個清楚的內容入口", async () => {
   const html = await renderHtml("/");
 
-  assert.match(html, /<title>夜行手記｜寫給還醒著的人<\/title>/);
+  assert.match(html, /<title>夜行手記｜Dennis 的程式學習與生活筆記<\/title>/);
+  assert.match(html, /Dennis Night Notes/);
+  assert.match(html, /Dennis 的程式學習、系統開發與生活紀錄/);
+  assert.match(html, /"@type":"WebSite"/);
+  assert.match(html, /"alternateName":\["Dennis Night Notes","dennisnightnotes.com"\]/);
   assert.match(html, /href="\/tech"[^>]*>技術成長/);
   assert.match(html, /href="\/articles"[^>]*>文章總覽/);
   assert.match(html, /href="\/tech\/quick-look"/);
@@ -396,7 +400,7 @@ test("公開頁面一律使用可完整載入的站內超連結", async () => {
     readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
   ]);
   for (const source of [home, topbar, reading, techReading]) assert.doesNotMatch(source, /from "next\/link"|<Link/);
-  assert.match(topbar, /<a className="inner-brand" href="\/">/);
+  assert.match(topbar, /<a className="inner-brand" href="\/"[^>]*>/);
   assert.match(reading, /<a href="\/">返回首頁<\/a>/);
   assert.match(reading, /<a href="\/articles">查看文章總覽<\/a>/);
 });
@@ -411,6 +415,24 @@ test("搜尋引擎可讀取公開網站規則與網站地圖", async () => {
   assert.match(robots, /Sitemap: https:\/\/dennisnightnotes\.com\/sitemap\.xml/);
   assert.match(sitemap, /<loc>https:\/\/dennisnightnotes\.com\/articles<\/loc>/);
   assert.doesNotMatch(sitemap, /\/studio/);
+  assert.doesNotMatch(sitemap, /\/tech\/page/);
+});
+
+test("品牌、文章結構化資料與不存在頁面的索引訊號一致", async () => {
+  const [layout, reading, techRoute, missingResponse] = await Promise.all([
+    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/notes/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
+    render("/tech/page"),
+  ]);
+  assert.match(layout, /applicationName: siteName/);
+  assert.match(layout, /siteName,/);
+  assert.doesNotMatch(layout + reading + techRoute, /夜行手札/);
+  assert.match(reading, /"@type": "BlogPosting"/);
+  assert.match(reading, /"@type": "BreadcrumbList"/);
+  assert.match(reading, /postSeoDescription\(post\)/);
+  assert.match(techRoute, /if \(!article\) notFound\(\)/);
+  assert.equal(missingResponse.status, 404);
 });
 
 test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線", async () => {

@@ -5,30 +5,36 @@ import { SafeMarkdown } from "../../components/SafeMarkdown";
 import { getPublishedPostBySlug } from "../../lib/posts";
 import { categoryLabel, topicLabel } from "../../lib/post-taxonomy";
 import { techCollectionLabel } from "../../content/tech";
+import { postSeoDescription, publicPostExcerpt } from "../../lib/seo";
+import { absoluteSiteUrl, authorName, siteName } from "../../lib/site";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   try {
     const post = await getPublishedPostBySlug((await params).slug);
-    if (!post) return { title: "找不到札記｜夜行手札" };
+    if (!post) return { title: `找不到文章｜${siteName}`, robots: { index: false, follow: true } };
     const url = `/notes/${post.slug}`;
+    const description = postSeoDescription(post);
     return {
-      title: `${post.title}｜夜行手札`,
-      description: post.excerpt,
+      title: `${post.title}｜${siteName}`,
+      description,
       alternates: { canonical: url },
       openGraph: {
         type: "article",
         url,
-        title: post.title,
-        description: post.excerpt,
+        siteName,
+        title: `${post.title}｜${siteName}`,
+        description,
+        images: [{ url: "/og.png", width: 1733, height: 909, alt: `${post.title}｜${siteName}` }],
         publishedTime: post.publishedAt ?? post.createdAt,
         modifiedTime: post.updatedAt,
         tags: [categoryLabel(post.category), ...(post.techCollection ? [techCollectionLabel(post.techCollection)] : []), topicLabel(post.topic)],
       },
+      twitter: { card: "summary_large_image", title: `${post.title}｜${siteName}`, description, images: ["/og.png"] },
     };
   } catch {
-    return { title: "夜行手札" };
+    return { title: siteName };
   }
 }
 
@@ -41,19 +47,62 @@ export default async function PublishedNotePage({ params }: { params: Promise<{ 
   }
   if (!post) notFound();
 
+  const canonicalUrl = absoluteSiteUrl(`/notes/${post.slug}`);
+  const categoryUrl = absoluteSiteUrl(categoryHref(post.category));
+  const categoryName = categoryLabel(post.category);
+  const description = postSeoDescription(post);
+  const breadcrumbs = [
+    { name: "首頁", url: absoluteSiteUrl() },
+    { name: "文章總覽", url: absoluteSiteUrl("/articles") },
+    { name: categoryName, url: categoryUrl },
+    ...(post.techCollection ? [{ name: techCollectionLabel(post.techCollection), url: absoluteSiteUrl(`/tech/${post.techCollection}`) }] : []),
+    { name: post.title, url: canonicalUrl },
+  ];
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        "@id": `${canonicalUrl}#article`,
+        headline: post.title,
+        description,
+        url: canonicalUrl,
+        mainEntityOfPage: canonicalUrl,
+        image: [absoluteSiteUrl("/og.png")],
+        datePublished: post.publishedAt ?? post.createdAt,
+        dateModified: post.updatedAt,
+        inLanguage: "zh-Hant",
+        articleSection: post.techCollection ? techCollectionLabel(post.techCollection) : categoryName,
+        keywords: [categoryName, ...(post.techCollection ? [techCollectionLabel(post.techCollection)] : []), topicLabel(post.topic)],
+        author: { "@type": "Person", name: authorName, url: absoluteSiteUrl("/about") },
+        publisher: { "@type": "Organization", name: siteName, url: absoluteSiteUrl() },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbs.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.name,
+          item: item.url,
+        })),
+      },
+    ],
+  };
+
   return (
     <main className="inner-page published-reading-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd).replace(/</g, "\\u003c") }} />
       <TopBar />
       <article className="published-reading">
         <nav className="published-breadcrumb" aria-label="文章路徑"><a href="/">首頁</a><span>/</span><a href="/articles">文章總覽</a><span>/</span><a href={categoryHref(post.category)}>{categoryLabel(post.category)}</a>{post.techCollection ? <><span>/</span><a href={`/tech/${post.techCollection}`}>{techCollectionLabel(post.techCollection)}</a></> : null}</nav>
         <header>
           <p>{categoryLabel(post.category)}{post.techCollection ? ` · ${techCollectionLabel(post.techCollection)}` : ""} · {topicLabel(post.topic)}</p>
           <h1>{post.title}</h1>
-          <div>{post.excerpt}</div>
+          <div>{publicPostExcerpt(post)}</div>
           <section className="published-reading-meta" aria-label="文章資訊"><time dateTime={post.publishedAt ?? post.updatedAt}>{formatDate(post.publishedAt ?? post.updatedAt)}</time><span>約 {readingMinutes(post.content)} 分鐘閱讀</span></section>
         </header>
         <SafeMarkdown content={post.content} />
-        <footer><a href={post.techCollection ? `/tech/${post.techCollection}` : categoryHref(post.category)}>← 回到{post.techCollection ? techCollectionLabel(post.techCollection) : categoryLabel(post.category)}</a><a href="/articles">查看文章總覽</a><a href="/">返回首頁</a><span>夜行手札 · slowly documented</span></footer>
+        <footer><a href={post.techCollection ? `/tech/${post.techCollection}` : categoryHref(post.category)}>← 回到{post.techCollection ? techCollectionLabel(post.techCollection) : categoryLabel(post.category)}</a><a href="/articles">查看文章總覽</a><a href="/">返回首頁</a><span>夜行手記 · slowly documented</span></footer>
       </article>
     </main>
   );

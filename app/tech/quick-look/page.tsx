@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import { TopBar } from "../../TopBar";
 import { LivePublishedPosts } from "../../components/LivePublishedPosts";
 import { SeriesNav } from "../../components/SeriesNav";
 import { quickTerms } from "../../content/tech";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "簡單看看｜開發工具與工程名詞解說｜夜行手記",
+  description: "快速理解 Git、Docker、Redis、Nginx、JWT、CI/CD 等開發工具與工程名詞解決的問題及常見使用情境。",
+  alternates: { canonical: "/tech/quick-look" },
+};
 
 export default function QuickLookPage() {
   return (

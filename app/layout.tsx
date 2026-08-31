@@ -1,23 +1,30 @@
 import type { Metadata } from "next";
 import { NavigationSpeedup } from "./components/NavigationSpeedup";
-import { siteUrl } from "./lib/site";
+import { siteDescription, siteEnglishName, siteName, siteTagline, siteUrl } from "./lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "夜行手記｜寫給還醒著的人",
-  description: "整理程式技術、個人經歷與出遊記錄的夜間手札。",
+  applicationName: siteName,
+  title: `${siteName}｜${siteTagline}`,
+  description: siteDescription,
+  authors: [{ name: "Dennis", url: "/about" }],
+  creator: "Dennis",
+  publisher: siteName,
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "夜行手記｜寫給還醒著的人",
-    description: "整理程式技術、個人經歷與出遊記錄的夜間手札。",
+    title: `${siteName}｜${siteTagline}`,
+    description: siteDescription,
+    siteName,
+    url: "/",
     locale: "zh_TW",
     type: "website",
-    images: [{ url: "/og.png", width: 1733, height: 909, alt: "夜行手記——趴在夜晚窗台上的大眼貓" }],
+    images: [{ url: "/og.png", width: 1733, height: 909, alt: `${siteName}（${siteEnglishName}）——趴在夜晚窗台上的大眼貓` }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "夜行手記｜寫給還醒著的人",
-    description: "整理程式技術、個人經歷與出遊記錄的夜間手札。",
+    title: `${siteName}｜${siteTagline}`,
+    description: siteDescription,
     images: ["/og.png"],
   },
 };

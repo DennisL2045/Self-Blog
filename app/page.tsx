@@ -1,14 +1,36 @@
 import { CatWindow } from "./CatWindow";
 import { HomeLatestNotes } from "./components/HomeLatestNotes";
+import { absoluteSiteUrl, authorName, siteDescription, siteEnglishName, siteName } from "./lib/site";
 
 export const dynamic = "force-dynamic";
 
 export default function Home() {
+  const identityJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${absoluteSiteUrl()}#website`,
+        url: absoluteSiteUrl(),
+        name: siteName,
+        alternateName: [siteEnglishName, "dennisnightnotes.com"],
+        description: siteDescription,
+        inLanguage: "zh-Hant",
+      },
+      {
+        "@type": "Person",
+        "@id": `${absoluteSiteUrl("/about")}#dennis`,
+        name: authorName,
+        url: absoluteSiteUrl("/about"),
+      },
+    ],
+  };
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(identityJsonLd).replace(/</g, "\\u003c") }} />
       <header className="site-header">
         <a className="wordmark" href="#top" aria-label="夜行手記首頁">
-          夜行手記 <span>after dusk</span>
+          夜行手記 <span>Dennis Night Notes</span>
         </a>
         <nav aria-label="主要選單">
           <a href="/articles">文章總覽</a>
@@ -24,6 +46,7 @@ export default function Home() {
         <div className="hero-copy">
           <p className="eyebrow">A quiet corner on the internet</p>
           <h1 id="hero-title">晚上好，<br />要一起看月亮嗎？</h1>
+          <p className="brand-intro">Dennis 的程式學習、系統開發與生活紀錄</p>
           <p className="intro">這裡收藏慢慢長出的理解：一段程式、一個做過的選擇、一趟旅程，和深夜才想明白的心情。</p>
           <a className="read-link" href="#notes">往下讀一點 <span aria-hidden="true">↓</span></a>
         </div>
