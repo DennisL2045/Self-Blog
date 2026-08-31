@@ -1,4 +1,5 @@
 import { CatWindow } from "./CatWindow";
+import { BrandMark } from "./components/BrandMark";
 import { HomeLatestNotes } from "./components/HomeLatestNotes";
 import { absoluteSiteUrl, authorName, siteDescription, siteEnglishName, siteName } from "./lib/site";
 
@@ -30,7 +31,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(identityJsonLd).replace(/</g, "\\u003c") }} />
       <header className="site-header">
         <a className="wordmark" href="#top" aria-label="夜行手記首頁">
-          夜行手記 <span>Dennis Night Notes</span>
+          <BrandMark /><span className="wordmark-text">夜行手記 <small>Dennis Night Notes</small></span>
         </a>
         <nav aria-label="主要選單">
           <a href="/articles">文章總覽</a>
@@ -80,7 +81,7 @@ export default function Home() {
       </section>
 
       <footer>
-        <p>© 2026 夜行手記</p>
+        <p>© 2026 夜行手記 · Dennis Night Notes</p>
         <p>今晚也別太晚睡。</p>
       </footer>
     </main>

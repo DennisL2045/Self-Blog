@@ -11,6 +11,14 @@ export const metadata: Metadata = {
   authors: [{ name: "Dennis", url: "/about" }],
   creator: "Dennis",
   publisher: siteName,
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon-48x48.png", type: "image/png", sizes: "48x48" },
+      { url: "/icon-192x192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
+  },
   alternates: { canonical: "/" },
   openGraph: {
     title: `${siteName}｜${siteTagline}`,

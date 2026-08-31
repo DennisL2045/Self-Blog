@@ -33,7 +33,7 @@ async function renderHtml(pathname) {
 test("首頁呈現四個清楚的內容入口", async () => {
   const html = await renderHtml("/");
 
-  assert.match(html, /<title>夜行手記｜Dennis 的程式學習與生活筆記<\/title>/);
+  assert.match(html, /<title>夜行手記｜Dennis 的程式學習、系統開發與跑旅筆記<\/title>/);
   assert.match(html, /Dennis Night Notes/);
   assert.match(html, /Dennis 的程式學習、系統開發與生活紀錄/);
   assert.match(html, /"@type":"WebSite"/);
@@ -45,6 +45,22 @@ test("首頁呈現四個清楚的內容入口", async () => {
   assert.match(html, /href="\/experience"/);
   assert.match(html, /href="\/travel"/);
   assert.match(html, /一隻趴在夜晚窗台上的黑色大眼貓/);
+});
+
+test("品牌圖示採深夜藍 N 並保留完整網站名稱", async () => {
+  const [home, topbar, layout, manifest, icon] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/manifest.ts", import.meta.url), "utf8"),
+    readFile(new URL("../public/icon-512x512.png", import.meta.url)),
+  ]);
+  assert.match(home, /<BrandMark \/><span className="wordmark-text">夜行手記/);
+  assert.match(topbar, /<BrandMark compact \/><span>夜行手記<\/span>/);
+  assert.match(layout, /favicon-48x48\.png/);
+  assert.match(layout, /apple-touch-icon\.png/);
+  assert.match(manifest, /theme_color: "#101525"/);
+  assert.deepEqual([...icon.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
 });
 
 test("技術成長頁保留分類並撤下公開示範文章", async () => {
@@ -216,6 +232,45 @@ test("技術分類卡片會開啟自己的文章列表", async () => {
   assert.match(styles, /\.collection-hero > div[^}]*display:flex[^}]*justify-content:space-between/);
   assert.match(styles, /\.collection-article-list > \.paginated-posts \{ display:block; width:100%; \}/);
   assert.doesNotMatch(styles, /\.collection-article-list > div \{/);
+});
+
+test("Web 開發頁自然收納 JavaScript 路線，文章頁提供具體延伸閱讀", async () => {
+  const [collectionPage, readingPage, styles] = await Promise.all([
+    readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/notes/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(collectionPage, /category\.slug === "web-development"/);
+  assert.match(collectionPage, /className="javascript-path"/);
+  assert.match(collectionPage, /JavaScript 基礎路線/);
+  assert.match(readingPage, /className="related-reading"/);
+  assert.match(readingPage, /先建立前一個概念/);
+  assert.match(readingPage, /接著理解下一個概念/);
+  assert.match(styles, /\.javascript-path/);
+  assert.match(styles, /\.related-reading/);
+});
+
+test("空的頂層書架暫停索引並依文章狀態加入 sitemap", async () => {
+  const [experience, travel, sitemap] = await Promise.all([
+    readFile(new URL("../app/experience/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/travel/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/sitemap.ts", import.meta.url), "utf8"),
+  ]);
+  for (const source of [experience, travel]) {
+    assert.match(source, /robots: posts\.length \? undefined : \{ index: false, follow: true \}/);
+  }
+  assert.match(sitemap, /publishedCategories/);
+  assert.match(sitemap, /\["experience", "travel"\]/);
+  assert.doesNotMatch(sitemap, /publicRoutes = \[[^\]]*"\/experience"/);
+});
+
+test("關於頁補上 Dennis 作者介紹與 ProfilePage 資料", async () => {
+  const about = await readFile(new URL("../app/about/page.tsx", import.meta.url), "utf8");
+  assert.match(about, /"@type": "ProfilePage"/);
+  assert.match(about, /"@type": "Person"/);
+  assert.match(about, /我是 Dennis/);
+  assert.match(about, /JavaScript、Web 與系統開發/);
+  assert.doesNotMatch(about, /@gmail\.com|mailto:/);
 });
 
 test("技術總列表與分類列表只更新下方文章並使用前端頁碼", async () => {

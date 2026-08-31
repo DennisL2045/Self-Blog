@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import { TopBar } from "../TopBar";
 import { LivePublishedPosts } from "../components/LivePublishedPosts";
 import { SeriesNav } from "../components/SeriesNav";
+import { listPublicPostSummaries } from "../lib/public-posts";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "個人經歷｜專案、學習歷程與成長記錄｜夜行手記",
-  description: "Dennis 的專案實作、學習轉折與成長記錄，保留當時的問題、選擇與實際使用情境。",
-  alternates: { canonical: "/experience" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const posts = await listPublicPostSummaries("experience", 1);
+  return {
+    title: "個人經歷｜專案、學習歷程與成長記錄｜夜行手記",
+    description: "Dennis 的專案實作、學習轉折與成長記錄，保留當時的問題、選擇與實際使用情境。",
+    alternates: { canonical: "/experience" },
+    robots: posts.length ? undefined : { index: false, follow: true },
+  };
+}
 
 export default function ExperiencePage() {
   return (

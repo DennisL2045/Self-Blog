@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { BrandMark } from "./components/BrandMark";
 
 export function TopBar() {
   const catRef = useRef<HTMLDivElement>(null);
@@ -18,7 +19,7 @@ export function TopBar() {
 
   return (
     <header className="inner-topbar" onPointerMove={(event) => look(event.clientX, event.clientY)}>
-      <a className="inner-brand" href="/" aria-label="夜行手記首頁">夜行手記</a>
+      <a className="inner-brand" href="/" aria-label="夜行手記首頁"><BrandMark compact /><span>夜行手記</span></a>
       <nav
         id="inner-navigation"
         className={`inner-nav ${menuOpen ? "open" : ""}`}

@@ -7,6 +7,7 @@ import { categoryLabel, topicLabel } from "../../lib/post-taxonomy";
 import { techCollectionLabel } from "../../content/tech";
 import { postSeoDescription, publicPostExcerpt } from "../../lib/seo";
 import { absoluteSiteUrl, authorName, siteName } from "../../lib/site";
+import { listPublicPostSummaries } from "../../lib/public-posts";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,14 @@ export default async function PublishedNotePage({ params }: { params: Promise<{ 
     post = null;
   }
   if (!post) notFound();
+
+  const relatedPosts = await listPublicPostSummaries(post.category, 50, post.techCollection ?? undefined);
+  const topicPath = relatedPosts
+    .filter((candidate) => candidate.topic.toLocaleLowerCase("en-US") === post.topic.toLocaleLowerCase("en-US"))
+    .sort((left, right) => new Date(left.publishedAt ?? left.updatedAt).getTime() - new Date(right.publishedAt ?? right.updatedAt).getTime());
+  const topicPosition = topicPath.findIndex((candidate) => candidate.id === post.id);
+  const previousPost = topicPosition > 0 ? topicPath[topicPosition - 1] : null;
+  const nextPost = topicPosition >= 0 && topicPosition < topicPath.length - 1 ? topicPath[topicPosition + 1] : null;
 
   const canonicalUrl = absoluteSiteUrl(`/notes/${post.slug}`);
   const categoryUrl = absoluteSiteUrl(categoryHref(post.category));
@@ -102,6 +111,15 @@ export default async function PublishedNotePage({ params }: { params: Promise<{ 
           <section className="published-reading-meta" aria-label="文章資訊"><time dateTime={post.publishedAt ?? post.updatedAt}>{formatDate(post.publishedAt ?? post.updatedAt)}</time><span>約 {readingMinutes(post.content)} 分鐘閱讀</span></section>
         </header>
         <SafeMarkdown content={post.content} />
+        {previousPost || nextPost ? (
+          <aside className="related-reading" aria-labelledby="related-reading-title">
+            <header><p>Continue this path</p><h2 id="related-reading-title">沿著 {topicLabel(post.topic)} 繼續讀</h2></header>
+            <div>
+              {previousPost ? <a href={`/notes/${previousPost.slug}`}><small>先建立前一個概念</small><strong>{previousPost.title}</strong><span>← 閱讀前一篇</span></a> : <span />}
+              {nextPost ? <a href={`/notes/${nextPost.slug}`}><small>接著理解下一個概念</small><strong>{nextPost.title}</strong><span>閱讀下一篇 →</span></a> : <span />}
+            </div>
+          </aside>
+        ) : null}
         <footer><a href={post.techCollection ? `/tech/${post.techCollection}` : categoryHref(post.category)}>← 回到{post.techCollection ? techCollectionLabel(post.techCollection) : categoryLabel(post.category)}</a><a href="/articles">查看文章總覽</a><a href="/">返回首頁</a><span>夜行手記 · slowly documented</span></footer>
       </article>
     </main>

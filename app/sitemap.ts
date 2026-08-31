@@ -5,13 +5,17 @@ import { techCategories } from "./content/tech";
 
 export const dynamic = "force-dynamic";
 
-const publicRoutes = ["", "/articles", "/tech", "/tech/quick-look", "/experience", "/travel", "/about"];
+const publicRoutes = ["", "/articles", "/tech", "/tech/quick-look", "/about"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await listPublicPostSummaries(undefined, 500);
   const publishedTechCollections = new Set(posts.filter((post) => post.category === "tech").map((post) => post.techCollection));
+  const publishedCategories = new Set(posts.map((post) => post.category));
   return [
     ...publicRoutes.map((path) => ({ url: `${siteUrl}${path}`, changeFrequency: "weekly" as const })),
+    ...["experience", "travel"]
+      .filter((category) => publishedCategories.has(category))
+      .map((category) => ({ url: `${siteUrl}/${category}`, changeFrequency: "weekly" as const })),
     ...techCategories
       .filter((category) => publishedTechCollections.has(category.slug))
       .map((category) => ({ url: `${siteUrl}/tech/${category.slug}`, changeFrequency: "weekly" as const })),

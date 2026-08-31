@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import { TopBar } from "../TopBar";
 import { LivePublishedPosts } from "../components/LivePublishedPosts";
 import { SeriesNav } from "../components/SeriesNav";
+import { listPublicPostSummaries } from "../lib/public-posts";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "出遊手札｜旅行、跑步與生活記錄｜夜行手記",
-  description: "Dennis 的旅行、跑步與生活記錄，以地點、日期、照片和旅途中的細小感受整理每段路程。",
-  alternates: { canonical: "/travel" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const posts = await listPublicPostSummaries("travel", 1);
+  return {
+    title: "出遊手札｜馬拉松、旅行與生活記錄｜夜行手記",
+    description: "Dennis 的馬拉松、旅行與生活記錄，以地點、日期、照片和旅途中的細小感受整理每段路程。",
+    alternates: { canonical: "/travel" },
+    robots: posts.length ? undefined : { index: false, follow: true },
+  };
+}
 
 export default function TravelPage() {
   return (
