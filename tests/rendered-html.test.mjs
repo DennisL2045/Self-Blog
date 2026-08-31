@@ -241,9 +241,18 @@ test("公開文章清單只讀取列表所需欄位", async () => {
     readFile(new URL("../app/lib/posts.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/public-posts.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(posts, /const summaryColumns = "id, slug, title, excerpt, category, tech_collection, topic, published_at, updated_at"/);
+  assert.match(posts, /substr\(content, 1, 1600\) AS content_preview/);
   assert.match(posts, /listPublishedPostSummaries/);
   assert.match(publicPosts, /safeListPublishedPostSummaries/);
+});
+
+test("文章摘要優先保留具體文案，過短摘要才依文章內容與書架重建", async () => {
+  const seo = await readFile(new URL("../app/lib/seo.ts", import.meta.url), "utf8");
+  assert.match(seo, /normalized\.length < 14/);
+  assert.match(seo, /contentBasedDescription\(post\.contentPreview \?\? post\.content \?\? "", post\.category, post\.title\)/);
+  assert.match(seo, /category === "travel" \|\| category === "experience"/);
+  assert.match(seo, /沿途的風景、活動體驗與當下感受/);
+  assert.doesNotMatch(seo, /核心概念、程式碼範例與常見使用情境/);
 });
 
 test("公開頁面預熱站內連結並提供立即的跳轉回饋", async () => {

@@ -67,7 +67,7 @@ export type PostInput = {
 export type PublishedPostSummaryRecord = Pick<
   PostRecord,
   "id" | "slug" | "title" | "excerpt" | "category" | "techCollection" | "topic" | "publishedAt" | "updatedAt"
->;
+> & { contentPreview: string };
 
 type PublishedPostSummaryRow = {
   id: string;
@@ -79,6 +79,7 @@ type PublishedPostSummaryRow = {
   topic: string;
   published_at: string | null;
   updated_at: string;
+  content_preview: string;
 };
 
 const SELECT_COLUMNS = `
@@ -120,6 +121,7 @@ function toPublishedPostSummary(row: PublishedPostSummaryRow): PublishedPostSumm
     topic: row.topic as PostTopic,
     publishedAt: row.published_at,
     updatedAt: row.updated_at,
+    contentPreview: row.content_preview,
   };
 }
 
@@ -151,7 +153,7 @@ export async function safeListPublishedPosts(category?: PostCategory, limit = 30
 
 export async function listPublishedPostSummaries(category?: PostCategory, limit = 30, techCollection?: TechCollection): Promise<PublishedPostSummaryRecord[]> {
   const database = getD1();
-  const summaryColumns = "id, slug, title, excerpt, category, tech_collection, topic, published_at, updated_at";
+  const summaryColumns = "id, slug, title, excerpt, category, tech_collection, topic, published_at, updated_at, substr(content, 1, 1600) AS content_preview";
   const statement = category === "tech" && techCollection
     ? database.prepare(`SELECT ${summaryColumns} FROM posts WHERE status = 'published' AND category = 'tech' AND tech_collection = ? ORDER BY published_at DESC LIMIT ?`).bind(techCollection, limit)
     : category
