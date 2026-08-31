@@ -1,5 +1,5 @@
 import { CatWindow } from "./CatWindow";
-import { BrandMark } from "./components/BrandMark";
+import { BrandMark, DoodleMoon } from "./components/BrandMark";
 import { HomeLatestNotes } from "./components/HomeLatestNotes";
 import { absoluteSiteUrl, authorName, siteDescription, siteEnglishName, siteName } from "./lib/site";
 
@@ -72,7 +72,7 @@ export default function Home() {
       </section>
 
       <section className="about" id="about">
-        <p className="about-mark">☾</p>
+        <p className="about-mark"><DoodleMoon /></p>
         <div>
           <p className="eyebrow">About this place</p>
           <h2>寫給還醒著的人</h2>
@@ -82,6 +82,7 @@ export default function Home() {
 
       <footer>
         <p>© 2026 夜行手記 · Dennis Night Notes</p>
+        <DoodleMoon className="footer-moon" />
         <p>今晚也別太晚睡。</p>
       </footer>
     </main>

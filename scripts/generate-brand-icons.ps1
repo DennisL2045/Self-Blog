@@ -1,4 +1,5 @@
 Add-Type -AssemblyName System.Drawing
+$ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $publicDir = Join-Path $projectRoot "public"
@@ -13,36 +14,33 @@ function New-NightNotesIcon {
   $bitmap.SetResolution(96, 96)
   $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
   $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-  $graphics.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
   $night = [System.Drawing.ColorTranslator]::FromHtml("#101525")
   $moon = [System.Drawing.ColorTranslator]::FromHtml("#E4BD70")
-  $paper = [System.Drawing.ColorTranslator]::FromHtml("#F3EAD9")
   $graphics.Clear($night)
 
-  $font = New-Object System.Drawing.Font("Segoe UI", ($Size * 0.56), [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
-  $textBrush = New-Object System.Drawing.SolidBrush($paper)
-  $format = New-Object System.Drawing.StringFormat
-  $format.Alignment = [System.Drawing.StringAlignment]::Center
-  $format.LineAlignment = [System.Drawing.StringAlignment]::Center
-  $textArea = New-Object System.Drawing.RectangleF(($Size * 0.02), ($Size * 0.07), ($Size * 0.88), ($Size * 0.88))
-  $graphics.DrawString("N", $font, $textBrush, $textArea, $format)
-
   $moonBrush = New-Object System.Drawing.SolidBrush($moon)
-  $nightBrush = New-Object System.Drawing.SolidBrush($night)
-  $moonSize = [float]($Size * 0.17)
-  $moonX = [float]($Size * 0.72)
-  $moonY = [float]($Size * 0.13)
-  $graphics.FillEllipse($moonBrush, $moonX, $moonY, $moonSize, $moonSize)
-  $graphics.FillEllipse($nightBrush, ($moonX + $Size * 0.055), ($moonY - $Size * 0.025), $moonSize, $moonSize)
+  $moonPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+  $moonPath.StartFigure()
+  $moonPath.AddBezier(($Size * .70), ($Size * .17), ($Size * .44), ($Size * .15), ($Size * .29), ($Size * .34), ($Size * .30), ($Size * .53))
+  $moonPath.AddBezier(($Size * .30), ($Size * .53), ($Size * .31), ($Size * .74), ($Size * .49), ($Size * .86), ($Size * .74), ($Size * .79))
+  $moonPath.AddBezier(($Size * .74), ($Size * .79), ($Size * .55), ($Size * .73), ($Size * .49), ($Size * .61), ($Size * .50), ($Size * .49))
+  $moonPath.AddBezier(($Size * .50), ($Size * .49), ($Size * .51), ($Size * .35), ($Size * .58), ($Size * .24), ($Size * .70), ($Size * .17))
+  $moonPath.CloseFigure()
+  $graphics.FillPath($moonBrush, $moonPath)
+
+  $graphics.SetClip($moonPath)
+  $strokeColor = [System.Drawing.Color]::FromArgb(58, 116, 78, 43)
+  $strokePen = New-Object System.Drawing.Pen($strokeColor, [Math]::Max(1, ($Size * .009)))
+  $graphics.DrawBezier($strokePen, ($Size * .35), ($Size * .35), ($Size * .31), ($Size * .47), ($Size * .38), ($Size * .64), ($Size * .52), ($Size * .73))
+  $graphics.DrawBezier($strokePen, ($Size * .39), ($Size * .27), ($Size * .34), ($Size * .43), ($Size * .42), ($Size * .57), ($Size * .55), ($Size * .67))
+  $graphics.ResetClip()
 
   $target = Join-Path $publicDir $FileName
   $bitmap.Save($target, [System.Drawing.Imaging.ImageFormat]::Png)
 
-  $format.Dispose()
-  $nightBrush.Dispose()
+  $strokePen.Dispose()
+  $moonPath.Dispose()
   $moonBrush.Dispose()
-  $textBrush.Dispose()
-  $font.Dispose()
   $graphics.Dispose()
   $bitmap.Dispose()
 }

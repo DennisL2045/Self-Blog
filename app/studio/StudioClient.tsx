@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { DoodleMoon } from "../components/BrandMark";
 import { SafeMarkdown } from "../components/SafeMarkdown";
 import { editorTemplates, getEditorTemplate } from "../content/editor-templates";
 import { techCategories, techCollectionLabel, type TechCollection } from "../content/tech";
@@ -366,7 +367,7 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
             {message && <p className="studio-message" role="status">{message}</p>}
           </section>
         ) : (
-          <section className="studio-welcome"><span>☾</span><h2>從第一篇文章開始</h2><p>可以直接使用「var、let、const」範本。建立後仍是私人草稿，只有按下發布才會出現在「技術成長 → Web 開發 → JavaScript」。</p><div><button onClick={() => void createNew("javascript-var-let-const")} disabled={busy}>用 JS 範本開始</button><button className="secondary" onClick={() => void createNew()} disabled={busy}>建立空白文章</button></div>{message && <p role="status">{message}</p>}</section>
+          <section className="studio-welcome"><span><DoodleMoon /></span><h2>從第一篇文章開始</h2><p>可以直接使用「var、let、const」範本。建立後仍是私人草稿，只有按下發布才會出現在「技術成長 → Web 開發 → JavaScript」。</p><div><button onClick={() => void createNew("javascript-var-let-const")} disabled={busy}>用 JS 範本開始</button><button className="secondary" onClick={() => void createNew()} disabled={busy}>建立空白文章</button></div>{message && <p role="status">{message}</p>}</section>
         )}
       </div>
     </div>
