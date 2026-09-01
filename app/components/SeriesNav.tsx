@@ -13,11 +13,13 @@ const series = [
 export function SeriesNav({ current }: { current: SeriesKey }) {
   return (
     <nav className="series-nav" aria-label="文章系列">
-      {series.map((item) => (
-        <a className={item.key === current ? "active" : ""} href={item.href} aria-current={item.key === current ? "page" : undefined} key={item.key}>
-          <span>{item.number}</span><small>{item.english}</small><strong>{item.label}</strong>
-        </a>
-      ))}
+      <div className="series-nav-track">
+        {series.map((item) => (
+          <a className={item.key === current ? "active" : ""} href={item.href} aria-current={item.key === current ? "page" : undefined} key={item.key}>
+            <span>{item.number}</span><small>{item.english}</small><strong>{item.label}</strong>
+          </a>
+        ))}
+      </div>
     </nav>
   );
 }
