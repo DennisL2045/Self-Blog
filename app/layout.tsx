@@ -3,6 +3,8 @@ import { NavigationSpeedup } from "./components/NavigationSpeedup";
 import { siteDescription, siteEnglishName, siteName, siteTagline, siteUrl } from "./lib/site";
 import "./globals.css";
 
+const iconVersion = "20260901-web";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   applicationName: siteName,
@@ -14,10 +16,11 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon-48x48.png", type: "image/png", sizes: "48x48" },
-      { url: "/icon-192x192.png", type: "image/png", sizes: "192x192" },
+      { url: `/favicon-48x48.png?v=${iconVersion}`, type: "image/png", sizes: "48x48" },
+      { url: `/icon-192x192.png?v=${iconVersion}`, type: "image/png", sizes: "192x192" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
+    shortcut: [{ url: `/favicon-48x48.png?v=${iconVersion}`, type: "image/png" }],
+    apple: [{ url: `/apple-touch-icon.png?v=${iconVersion}`, type: "image/png", sizes: "180x180" }],
   },
   alternates: { canonical: "/" },
   openGraph: {
@@ -40,7 +43,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-Hant">
-      <head><link rel="preload" href="/fonts/jf-openhuninn-2.1.woff2" as="font" type="font/woff2" crossOrigin="anonymous" /></head>
+      <head>
+        <link rel="icon" href={`/favicon-48x48.png?v=${iconVersion}`} type="image/png" sizes="48x48" />
+        <link rel="shortcut icon" href={`/favicon-48x48.png?v=${iconVersion}`} type="image/png" />
+        <link rel="apple-touch-icon" href={`/apple-touch-icon.png?v=${iconVersion}`} sizes="180x180" />
+        <link rel="preload" href="/fonts/jf-openhuninn-2.1.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
       <body><NavigationSpeedup />{children}</body>
     </html>
   );
