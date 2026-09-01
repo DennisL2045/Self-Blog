@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TopBar } from "../../TopBar";
-import { PaginatedPostList } from "../../components/PaginatedPostList";
+import { FilterablePostList } from "../../components/FilterablePostList";
 import { SeriesNav } from "../../components/SeriesNav";
 import { getTechArticle, getTechCategory, techArticles, techCategories } from "../../content/tech";
 import { listPublicPostSummaries } from "../../lib/public-posts";
-import { publicPostExcerpt } from "../../lib/seo";
 import { siteName } from "../../lib/site";
 
 export const dynamic = "force-dynamic";
@@ -34,12 +33,7 @@ export default async function TechArticlePage({ params }: { params: Promise<{ sl
   const slug = (await params).slug;
   const category = getTechCategory(slug);
   if (category) {
-    const posts = await listPublicPostSummaries("tech", 50, category.slug);
-    const javascriptPosts = category.slug === "web-development"
-      ? posts
-        .filter((post) => post.topic.toLocaleLowerCase("en-US") === "javascript")
-        .sort((left, right) => new Date(left.publishedAt ?? left.updatedAt).getTime() - new Date(right.publishedAt ?? right.updatedAt).getTime())
-      : [];
+    const posts = await listPublicPostSummaries("tech", 100, category.slug);
     return (
       <main className="inner-page tech-page tech-collection-page">
         <TopBar />
@@ -49,29 +43,8 @@ export default async function TechArticlePage({ params }: { params: Promise<{ sl
             <div><p>{category.english}</p><span>{category.summary}</span></div>
           </header>
           <SeriesNav current="tech" />
-          {javascriptPosts.length > 1 ? (
-            <section className="javascript-path" aria-labelledby="javascript-path-title">
-              <header>
-                <div><p>JavaScript learning path</p><h2 id="javascript-path-title">JavaScript 基礎路線</h2></div>
-                <span>不另外拆出重複分類；依照概念之間的關係，從變數一路讀到函式如何保留外部狀態。</span>
-              </header>
-              <ol>
-                {javascriptPosts.map((post, index) => (
-                  <li key={post.id}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <div><h3><a href={`/notes/${post.slug}`}>{post.title}</a></h3><p>{publicPostExcerpt(post)}</p></div>
-                    <a href={`/notes/${post.slug}`} aria-label={`閱讀${post.title}`}>閱讀 <b aria-hidden="true">↗</b></a>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          ) : null}
-          <section className="collection-article-list" aria-labelledby="collection-articles-title">
-            <header className="collection-article-heading">
-              <h2 id="collection-articles-title">{category.name}文章</h2>
-              <div><p>Filed notes</p><span>{category.topics.join("、")}</span></div>
-            </header>
-            <PaginatedPostList posts={posts} emptyText={`「${category.name}」目前還沒有公開文章。`} />
+          <section className="collection-article-list" aria-label={`${category.name}文章`}>
+            <FilterablePostList posts={posts} categoryName={category.name} preferredTopics={category.topics} />
           </section>
           <footer className="collection-footer"><a href="/tech">← 回到全部技術分類</a><a href="/articles">文章總覽</a><a href="/">返回首頁</a></footer>
         </section>
