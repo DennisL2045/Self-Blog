@@ -27,12 +27,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         siteName,
         title: `${post.title}｜${siteName}`,
         description,
-        images: [{ url: "/og.png", width: 1733, height: 909, alt: `${post.title}｜${siteName}` }],
+        images: [{ url: "/og.png?v=20260901", width: 1733, height: 909, alt: `${post.title}｜${siteName}` }],
         publishedTime: post.publishedAt ?? post.createdAt,
         modifiedTime: post.updatedAt,
         tags: [categoryLabel(post.category), ...(post.techCollection ? [techCollectionLabel(post.techCollection)] : []), topicLabel(post.topic)],
       },
-      twitter: { card: "summary_large_image", title: `${post.title}｜${siteName}`, description, images: ["/og.png"] },
+      twitter: { card: "summary_large_image", title: `${post.title}｜${siteName}`, description, images: ["/og.png?v=20260901"] },
     };
   } catch {
     return { title: siteName };
@@ -77,7 +77,7 @@ export default async function PublishedNotePage({ params }: { params: Promise<{ 
         description,
         url: canonicalUrl,
         mainEntityOfPage: canonicalUrl,
-        image: [absoluteSiteUrl("/og.png")],
+        image: [absoluteSiteUrl("/og.png?v=20260901")],
         datePublished: post.publishedAt ?? post.createdAt,
         dateModified: post.updatedAt,
         inLanguage: "zh-Hant",

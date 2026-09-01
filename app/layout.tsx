@@ -27,13 +27,13 @@ export const metadata: Metadata = {
     url: "/",
     locale: "zh_TW",
     type: "website",
-    images: [{ url: "/og.png", width: 1733, height: 909, alt: `${siteName}（${siteEnglishName}）——趴在夜晚窗台上的大眼貓` }],
+    images: [{ url: "/og.png?v=20260901", width: 1733, height: 909, alt: `${siteName}（${siteEnglishName}）簡約品牌字樣` }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteName}｜${siteTagline}`,
     description: siteDescription,
-    images: ["/og.png"],
+    images: ["/og.png?v=20260901"],
   },
 };
 
