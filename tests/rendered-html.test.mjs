@@ -150,19 +150,30 @@ test("編輯室可以新增並重複使用自訂主題", async () => {
   assert.doesNotMatch(posts, /postTopics\.includes\(payload\.topic/);
 });
 
-test("編輯室右側可直接改文並使用獨立滾動區", async () => {
-  const [editor, styles] = await Promise.all([
+test("編輯室右側可在預覽排版內修改文字並保留 Markdown 模式", async () => {
+  const [editor, markdown, styles] = await Promise.all([
     readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/SafeMarkdown.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
-  assert.match(editor, />直接編輯</);
+  assert.match(editor, />文字游標</);
+  assert.match(editor, />Markdown</);
+  assert.match(editor, /previewMode === "inline"/);
+  assert.match(editor, /editable={previewMode === "inline"}/);
+  assert.match(editor, /onContentChange=.*change\("content", content\)/);
   assert.match(editor, /className="studio-direct-editor"/);
   assert.match(editor, /onChange=\{\(event\) => change\("content", event\.target\.value\)\}/);
   assert.match(editor, /previewScrollRatioRef/);
   assert.match(editor, /previewBodyRef/);
   assert.match(editor, /nextPane\.scrollTop/);
   assert.match(editor, /focus\(\{ preventScroll: true \}\)/);
+  assert.match(markdown, /data-preview-editable/);
+  assert.match(markdown, /serializeEditableContent/);
+  assert.match(markdown, /serializeEditableList/);
+  assert.match(markdown, /pastePlainText/);
+  assert.match(styles, /\.safe-markdown-editable \[data-preview-editable="true"\]/);
+  assert.match(styles, /\.studio-cursor-button i::after/);
   assert.match(styles, /\.studio-preview-body[^}]*overflow-y:auto/);
   assert.match(styles, /\.studio-direct-editor[^}]*overflow-y:auto/);
   assert.match(styles, /\.studio-layout \{ height:calc\(100svh - 86px\)/);

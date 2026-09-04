@@ -33,7 +33,7 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
   const [message, setMessage] = useState("");
   const [templateId, setTemplateId] = useState(editorTemplates[0]?.id ?? "");
   const [addingCustomTopic, setAddingCustomTopic] = useState(false);
-  const [previewMode, setPreviewMode] = useState<"preview" | "edit">("preview");
+  const [previewMode, setPreviewMode] = useState<"preview" | "inline" | "edit">("preview");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewBodyRef = useRef<HTMLDivElement>(null);
   const directEditorRef = useRef<HTMLTextAreaElement>(null);
@@ -168,9 +168,9 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
     setMessage("範本已放入目前草稿；內容尚未儲存，也不會自動發布。" );
   }
 
-  function changePreviewMode(mode: "preview" | "edit") {
+  function changePreviewMode(mode: "preview" | "inline" | "edit") {
     if (mode === previewMode) return;
-    const currentPane = previewMode === "preview" ? previewBodyRef.current : directEditorRef.current;
+    const currentPane = previewMode === "edit" ? directEditorRef.current : previewBodyRef.current;
     if (currentPane) {
       const currentScrollableHeight = currentPane.scrollHeight - currentPane.clientHeight;
       previewScrollRatioRef.current = currentScrollableHeight > 0
@@ -180,7 +180,7 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
 
     setPreviewMode(mode);
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      const nextPane = mode === "preview" ? previewBodyRef.current : directEditorRef.current;
+      const nextPane = mode === "edit" ? directEditorRef.current : previewBodyRef.current;
       if (!nextPane) return;
       const nextScrollableHeight = nextPane.scrollHeight - nextPane.clientHeight;
       if (mode === "edit") directEditorRef.current?.focus({ preventScroll: true });
@@ -340,14 +340,25 @@ export function StudioClient({ initialPosts, email, sessionExpiresAt }: { initia
             </div>
             <aside className="studio-preview">
               <header className="studio-preview-header">
-                <div><span>{previewMode === "preview" ? "即時預覽" : "直接編輯"}</span><small>{previewMode === "preview" ? "查看文章發布後的閱讀排版" : "內容會和左側文字框即時同步"}</small></div>
+                <div>
+                  <span>{previewMode === "edit" ? "Markdown 編輯" : previewMode === "inline" ? "預覽內編輯" : "即時預覽"}</span>
+                  <small>{previewMode === "edit" ? "調整程式碼、表格與 Markdown 標記" : previewMode === "inline" ? "直接點選標題、段落或清單增刪文字" : "查看文章發布後的閱讀排版"}</small>
+                </div>
                 <div className="studio-preview-switch" role="group" aria-label="右側工作區模式">
                   <button type="button" className={previewMode === "preview" ? "active" : ""} aria-pressed={previewMode === "preview"} onClick={() => changePreviewMode("preview")}>預覽</button>
-                  <button type="button" className={previewMode === "edit" ? "active" : ""} aria-pressed={previewMode === "edit"} onClick={() => changePreviewMode("edit")}>直接編輯</button>
+                  <button type="button" className={`studio-cursor-button${previewMode === "inline" ? " active" : ""}`} aria-pressed={previewMode === "inline"} onClick={() => changePreviewMode("inline")}><i aria-hidden="true" />文字游標</button>
+                  <button type="button" className={previewMode === "edit" ? "active" : ""} aria-pressed={previewMode === "edit"} onClick={() => changePreviewMode("edit")}>Markdown</button>
                 </div>
               </header>
-              {previewMode === "preview" ? (
-                <div ref={previewBodyRef} className="studio-preview-body"><SafeMarkdown content={draft.content || "還沒有內容。"} /></div>
+              {previewMode !== "edit" ? (
+                <div ref={previewBodyRef} className="studio-preview-body">
+                  {previewMode === "inline" ? <p className="studio-inline-edit-note">文字修改後點到區塊外即可同步。程式碼與表格請使用 Markdown 模式。</p> : null}
+                  <SafeMarkdown
+                    content={draft.content || (previewMode === "inline" ? "" : "還沒有內容。")}
+                    editable={previewMode === "inline"}
+                    onContentChange={(content) => change("content", content)}
+                  />
+                </div>
               ) : (
                 <textarea
                   ref={directEditorRef}

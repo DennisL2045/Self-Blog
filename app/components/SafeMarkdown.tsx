@@ -1,10 +1,41 @@
-import type { ReactNode } from "react";
+import type { ClipboardEvent, FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from "react";
 import { CodeBlock } from "./CodeBlock";
 
-export function SafeMarkdown({ content, className = "safe-markdown" }: { content: string; className?: string }) {
+type SafeMarkdownProps = {
+  content: string;
+  className?: string;
+  editable?: boolean;
+  onContentChange?: (content: string) => void;
+};
+
+export function SafeMarkdown({ content, className = "safe-markdown", editable = false, onContentChange }: SafeMarkdownProps) {
   const lines = content.replaceAll("\r\n", "\n").split("\n");
   const blocks: ReactNode[] = [];
   let index = 0;
+
+  function editableBlock(start: number, end: number, serialize: (element: HTMLElement) => string) {
+    if (!editable || !onContentChange) return {};
+    return {
+      contentEditable: true,
+      suppressContentEditableWarning: true,
+      spellCheck: true,
+      tabIndex: 0,
+      "aria-label": "可直接編輯此段文字",
+      "data-preview-editable": "true",
+      onBlur(event: FocusEvent<HTMLElement>) {
+        const replacement = serialize(event.currentTarget);
+        const current = lines.slice(start, end).join("\n");
+        if (replacement === current) return;
+        const replacementLines = replacement ? replacement.split("\n") : [];
+        onContentChange([...lines.slice(0, start), ...replacementLines, ...lines.slice(end)].join("\n"));
+      },
+      onPaste: pastePlainText,
+      onKeyDown: finishEditingWithEscape,
+      onClick(event: MouseEvent<HTMLElement>) {
+        if ((event.target as HTMLElement).closest("a")) event.preventDefault();
+      },
+    };
+  }
 
   while (index < lines.length) {
     const line = lines[index];
@@ -69,52 +100,130 @@ export function SafeMarkdown({ content, className = "safe-markdown" }: { content
 
     const heading = line.match(/^(#{1,3})\s+(.+)$/);
     if (heading) {
+      const start = index;
       const children = renderInline(heading[2], `heading-${index}`);
-      blocks.push(heading[1].length === 1 ? <h1 key={`h-${index}`}>{children}</h1> : heading[1].length === 2 ? <h2 key={`h-${index}`}>{children}</h2> : <h3 key={`h-${index}`}>{children}</h3>);
       index += 1;
+      const props = editableBlock(start, index, (element) => `${heading[1]} ${serializeEditableContent(element)}`);
+      blocks.push(heading[1].length === 1 ? <h1 {...props} key={`h-${index}`}>{children}</h1> : heading[1].length === 2 ? <h2 {...props} key={`h-${index}`}>{children}</h2> : <h3 {...props} key={`h-${index}`}>{children}</h3>);
       continue;
     }
 
     if (/^[-*]\s+/.test(line)) {
+      const start = index;
       const items: string[] = [];
       while (index < lines.length && /^[-*]\s+/.test(lines[index])) {
         items.push(lines[index].replace(/^[-*]\s+/, ""));
         index += 1;
       }
-      blocks.push(<ul key={`ul-${index}`}>{items.map((item, itemIndex) => <li key={`${item}-${itemIndex}`}>{renderInline(item, `ul-${index}-${itemIndex}`)}</li>)}</ul>);
+      const props = editableBlock(start, index, (element) => serializeEditableList(element, false));
+      blocks.push(<ul {...props} key={`ul-${index}`}>{items.map((item, itemIndex) => <li key={`${item}-${itemIndex}`}>{renderInline(item, `ul-${index}-${itemIndex}`)}</li>)}</ul>);
       continue;
     }
 
     if (/^\d+\.\s+/.test(line)) {
+      const start = index;
       const items: string[] = [];
       while (index < lines.length && /^\d+\.\s+/.test(lines[index])) {
         items.push(lines[index].replace(/^\d+\.\s+/, ""));
         index += 1;
       }
-      blocks.push(<ol key={`ol-${index}`}>{items.map((item, itemIndex) => <li key={`${item}-${itemIndex}`}>{renderInline(item, `ol-${index}-${itemIndex}`)}</li>)}</ol>);
+      const props = editableBlock(start, index, (element) => serializeEditableList(element, true));
+      blocks.push(<ol {...props} key={`ol-${index}`}>{items.map((item, itemIndex) => <li key={`${item}-${itemIndex}`}>{renderInline(item, `ol-${index}-${itemIndex}`)}</li>)}</ol>);
       continue;
     }
 
     if (line.startsWith("> ")) {
+      const start = index;
       const quote: string[] = [];
       while (index < lines.length && lines[index].startsWith("> ")) {
         quote.push(lines[index].slice(2));
         index += 1;
       }
-      blocks.push(<blockquote key={`quote-${index}`}>{renderInlineLines(quote, `quote-${index}`)}</blockquote>);
+      const props = editableBlock(start, index, (element) => serializeEditableContent(element).split("\n").map((value) => `> ${value}`).join("\n"));
+      blocks.push(<blockquote {...props} key={`quote-${index}`}>{renderInlineLines(quote, `quote-${index}`)}</blockquote>);
       continue;
     }
 
+    const start = index;
     const paragraph: string[] = [line];
     index += 1;
     while (index < lines.length && lines[index].trim() && !isBlockStart(lines, index)) {
       paragraph.push(lines[index]);
       index += 1;
     }
-    blocks.push(<p key={`p-${index}`}>{renderInlineLines(paragraph, `p-${index}`)}</p>);
+    const props = editableBlock(start, index, serializeEditableContent);
+    blocks.push(<p {...props} key={`p-${index}`}>{renderInlineLines(paragraph, `p-${index}`)}</p>);
   }
 
-  return <div className={className}>{blocks}</div>;
+  if (editable && blocks.length === 0) {
+    const props = editableBlock(0, lines.length, serializeEditableContent);
+    blocks.push(<p {...props} className="markdown-edit-placeholder" data-placeholder="點這裡開始輸入文章內容" key="editable-placeholder" />);
+  }
+
+  return <div className={`${className}${editable ? " safe-markdown-editable" : ""}`}>{blocks}</div>;
+}
+
+function serializeEditableList(element: HTMLElement, ordered: boolean) {
+  return Array.from(element.children)
+    .filter((child) => child.tagName === "LI")
+    .map((child, index) => `${ordered ? `${index + 1}.` : "-"} ${serializeEditableContent(child as HTMLElement)}`)
+    .join("\n");
+}
+
+function serializeEditableContent(element: HTMLElement) {
+  return serializeEditableChildren(element)
+    .replaceAll("\u00a0", " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function serializeEditableChildren(element: HTMLElement) {
+  return Array.from(element.childNodes).map((node, index, nodes) => {
+    const value = serializeEditableNode(node);
+    if (node instanceof HTMLElement && (node.tagName === "DIV" || node.tagName === "P") && index < nodes.length - 1) {
+      return `${value}\n`;
+    }
+    return value;
+  }).join("");
+}
+
+function serializeEditableNode(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? "";
+  if (!(node instanceof HTMLElement)) return "";
+  if (node.tagName === "BR") return "\n";
+
+  const content = serializeEditableChildren(node);
+  if (node.tagName === "STRONG" || node.tagName === "B") return `**${content}**`;
+  if (node.tagName === "CODE") return `\`${content}\``;
+  if (node.tagName === "A") {
+    const href = safeLink(node.getAttribute("href") ?? "");
+    return href ? `[${content}](${href})` : content;
+  }
+  if (node.tagName === "IMG") {
+    const source = node.getAttribute("src") ?? "";
+    return /^\/media\/[a-f0-9-]{36}$/i.test(source) ? `![${node.getAttribute("alt") ?? ""}](${source})` : "";
+  }
+  return content;
+}
+
+function pastePlainText(event: ClipboardEvent<HTMLElement>) {
+  event.preventDefault();
+  const text = event.clipboardData.getData("text/plain");
+  const selection = window.getSelection();
+  if (!selection?.rangeCount) return;
+  const range = selection.getRangeAt(0);
+  range.deleteContents();
+  const node = document.createTextNode(text);
+  range.insertNode(node);
+  range.setStartAfter(node);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function finishEditingWithEscape(event: KeyboardEvent<HTMLElement>) {
+  if (event.key === "Escape") event.currentTarget.blur();
 }
 
 function isBlockStart(lines: string[], index: number) {
