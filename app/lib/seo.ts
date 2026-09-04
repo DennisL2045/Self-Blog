@@ -52,7 +52,7 @@ function definitionSection(content: string) {
 function categoryFallback(category: PostCategory, title: string) {
   if (category === "travel") return `記錄「${title}」沿途的風景、活動體驗與當下感受。`;
   if (category === "experience") return `回顧「${title}」的實際經歷、當時選擇與一路累積的心得。`;
-  if (category === "quick-look") return `從實際使用情境認識「${title}」，先理解它解決的問題與常見出現位置。`;
+  if (category === "quick-look") return `從實際使用情境認識「${title}」，先理解他解決的問題與常見出現位置。`;
   return `從概念、範例與執行結果理解「${title}」，整理容易混淆的地方與實際使用方式。`;
 }
 

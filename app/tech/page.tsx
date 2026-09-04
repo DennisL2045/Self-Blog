@@ -42,7 +42,7 @@ export default async function TechPage() {
         ))}
         <a className="quick-look-entry" href="/tech/quick-look">
           <span>07</span><p>Quick glossary</p><h2>簡單看看</h2>
-          <div>從求職網站或職缺描述遇見的工具名詞，用短短幾段先理解它是什麼、何時會用到。</div>
+          <div>從求職網站或職缺描述遇見的工具名詞，用短短幾段先理解他是什麼、何時會用到。</div>
           <b>打開名詞小冊 ↗</b>
         </a>
       </section>

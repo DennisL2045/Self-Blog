@@ -84,7 +84,7 @@ test("簡單看看頁整理工具名詞與使用情境", async () => {
   assert.match(html, />Docker</);
   assert.match(html, />Redis</);
   assert.match(html, /常見使用情境/);
-  assert.match(html, /先知道它解決什麼問題。/);
+  assert.match(html, /先知道他解決什麼問題。/);
   assert.doesNotMatch(html, /以及通常在哪裡出現|怎麼使用這一區/);
 });
 
@@ -562,12 +562,13 @@ test("編輯室登入按鈕與工作階段使用同一個伺服器狀態", async
 });
 
 test("文章內容與照片採安全輸出及版本保存", async () => {
-  const [markdown, mediaRoute, initialMigration, topicMigration, collectionMigration] = await Promise.all([
+  const [markdown, mediaRoute, initialMigration, topicMigration, collectionMigration, pronounMigration] = await Promise.all([
     readFile(new URL("../app/components/SafeMarkdown.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/studio/media/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../drizzle/0000_nappy_blur.sql", import.meta.url), "utf8"),
     readFile(new URL("../drizzle/0001_condemned_gamma_corps.sql", import.meta.url), "utf8"),
     readFile(new URL("../drizzle/0002_premium_stranger.sql", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0004_normalize_article_pronoun.sql", import.meta.url), "utf8"),
   ]);
 
   assert.doesNotMatch(markdown, /dangerouslySetInnerHTML/);
@@ -581,6 +582,8 @@ test("文章內容與照片採安全輸出及版本保存", async () => {
   assert.match(collectionMigration, /ALTER TABLE `posts` ADD `tech_collection`/);
   assert.match(collectionMigration, /UPDATE `posts` SET `tech_collection`/);
   assert.match(collectionMigration, /'web-development'/);
+  assert.match(pronounMigration, /INSERT INTO `post_revisions`/);
+  assert.match(pronounMigration, /replace\(`content`, '它', '他'\)/);
 });
 
 test("studio is restricted to the private Cloudflare Access hostname", async () => {

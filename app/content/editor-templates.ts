@@ -37,7 +37,7 @@ export const editorTemplates: EditorTemplate[] = [
 
 ## var：函式作用域與提升
 
-【說明 function scope、hoisting，以及它為什麼容易產生不直覺的結果。】
+【說明 function scope、hoisting，以及他為什麼容易產生不直覺的結果。】
 
 \`\`\`js
 function showVarScope() {
