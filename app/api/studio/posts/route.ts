@@ -5,6 +5,7 @@ import {
 } from "../../../lib/posts";
 import {
   getStudioSessionFromRequest,
+  hasJsonContentType,
   isSameOriginMutation,
 } from "../../../lib/studio-auth";
 import { hasStudioGatewayAccess, studioNotFoundResponse } from "../../../lib/studio-gateway";
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
   const session = await getStudioSessionFromRequest(request);
   if (!session) return Response.json({ error: "unauthorized" }, { status: 401 });
   if (!isSameOriginMutation(request)) return Response.json({ error: "forbidden" }, { status: 403 });
+  if (!hasJsonContentType(request)) return Response.json({ error: "unsupported_media_type" }, { status: 415 });
   if (Number(request.headers.get("content-length") ?? 0) > 300_000) {
     return Response.json({ error: "內容超過可接受大小" }, { status: 413 });
   }

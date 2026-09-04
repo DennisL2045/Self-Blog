@@ -211,12 +211,13 @@ test("公開文章清單由伺服器輸出並以完整頁面連結開啟文章",
   assert.match(studio, /查看公開文章/);
 });
 
-test("技術分類卡片會開啟自己的文章列表", async () => {
-  const [webHtml, backendHtml, techPage, collectionPage, posts, editor, styles] = await Promise.all([
+test("技術分類卡片會開啟可篩選的文章列表", async () => {
+  const [webHtml, backendHtml, techPage, collectionPage, filterableList, posts, editor, styles] = await Promise.all([
     renderHtml("/tech/web-development"),
     renderHtml("/tech/backend-data"),
     readFile(new URL("../app/tech/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/FilterablePostList.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/posts.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/studio/StudioClient.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
@@ -228,28 +229,30 @@ test("技術分類卡片會開啟自己的文章列表", async () => {
   assert.match(techPage, /articleCounts\.get\(category\.slug\)/);
   assert.match(techPage, /PaginatedPostList posts=\{posts\}/);
   assert.match(collectionPage, /className="collection-hero"/);
-  assert.match(collectionPage, /className="collection-article-heading"/);
+  assert.match(collectionPage, /<FilterablePostList posts=\{posts\}/);
+  assert.match(filterableList, /usedTopics/);
+  assert.match(filterableList, /type="search"/);
   assert.match(posts, /AND tech_collection = \?/);
   assert.match(posts, /defaultTechCollectionForTopic/);
   assert.match(editor, /技術成長.*Web 開發.*JavaScript/);
   assert.match(styles, /\.collection-hero > div[^}]*display:flex[^}]*justify-content:space-between/);
-  assert.match(styles, /\.collection-article-list > \.paginated-posts \{ display:block; width:100%; \}/);
+  assert.match(styles, /\.collection-article-list > \.collection-browser > \.paginated-posts \{ display:block; width:100%; \}/);
   assert.doesNotMatch(styles, /\.collection-article-list > div \{/);
 });
 
-test("Web 開發頁自然收納 JavaScript 路線，文章頁提供具體延伸閱讀", async () => {
-  const [collectionPage, readingPage, styles] = await Promise.all([
+test("Web 開發頁依已發布主題產生篩選頁籤，文章頁保留延伸閱讀", async () => {
+  const [collectionPage, filterableList, readingPage, styles] = await Promise.all([
     readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/FilterablePostList.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/notes/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
-  assert.match(collectionPage, /category\.slug === "web-development"/);
-  assert.match(collectionPage, /className="javascript-path"/);
-  assert.match(collectionPage, /JavaScript 基礎路線/);
+  assert.match(collectionPage, /preferredTopics=\{category\.topics\}/);
+  assert.match(filterableList, /for \(const post of posts\)/);
+  assert.match(filterableList, /posts\.filter\(\(post\)/);
+  assert.match(filterableList, /<PaginatedPostList/);
   assert.match(readingPage, /className="related-reading"/);
-  assert.match(readingPage, /先建立前一個概念/);
-  assert.match(readingPage, /接著理解下一個概念/);
-  assert.match(styles, /\.javascript-path/);
+  assert.match(styles, /\.collection-topic-tabs/);
   assert.match(styles, /\.related-reading/);
 });
 
@@ -276,9 +279,10 @@ test("關於頁補上 Dennis 作者介紹與 ProfilePage 資料", async () => {
   assert.doesNotMatch(about, /@gmail\.com|mailto:/);
 });
 
-test("技術總列表與分類列表只更新下方文章並使用前端頁碼", async () => {
-  const [pagination, techPage, collectionPage, styles] = await Promise.all([
+test("技術總列表與分類篩選只更新下方文章並使用前端頁碼", async () => {
+  const [pagination, filterableList, techPage, collectionPage, styles] = await Promise.all([
     readFile(new URL("../app/components/PaginatedPostList.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/FilterablePostList.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/tech/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/tech/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
@@ -290,7 +294,8 @@ test("技術總列表與分類列表只更新下方文章並使用前端頁碼",
   assert.match(pagination, /aria-current=\{pageNumber === currentPage \? "page" : undefined\}/);
   assert.doesNotMatch(pagination, /location|router|href=/);
   assert.match(techPage, /<PaginatedPostList posts=\{posts\}/);
-  assert.match(collectionPage, /<PaginatedPostList posts=\{posts\}/);
+  assert.match(collectionPage, /<FilterablePostList posts=\{posts\}/);
+  assert.match(filterableList, /<PaginatedPostList/);
   assert.match(styles, /\.article-pagination \{/);
 });
 
@@ -342,7 +347,8 @@ test("全站套用指定字體並放寬首頁與技術版面", async () => {
   assert.match(styles, /\/fonts\/jf-openhuninn-2\.1\.woff2/);
   assert.match(styles, /\.hero \{ width: min\(1400px/);
   assert.match(styles, /\.tech-hero \{ width:min\(1320px/);
-  assert.match(styles, /\.series-nav \{[^}]*gap:0/);
+  assert.match(styles, /\.series-nav \{[^}]*overflow-x:auto/);
+  assert.match(styles, /\.series-nav-track \{[^}]*width:max-content/);
   assert.match(styles, /\.hero-copy h1[^}]*3\.15rem/);
   assert.match(styles, /\.published-reading > header h1[^}]*3\.35rem/);
   assert.match(styles, /body, body \*, body \*::before, body \*::after \{ font-family:var\(--site-font\) !important/);
@@ -387,11 +393,11 @@ test("首頁與內頁在平板、手機使用漢堡選單", async () => {
   assert.match(styles, /@media \(max-width:520px\)[\s\S]*?\.inner-nav \{ left:12px; right:12px; width:auto; grid-template-columns:1fr/);
 });
 
-test("手機文章系列使用完整可見的二加三排列", async () => {
+test("手機文章系列維持單列並可橫向捲動", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  assert.match(css, /\.series-nav \{ display:grid; grid-template-columns:repeat\(6,minmax\(0,1fr\)\); overflow:visible; \}/);
-  assert.match(css, /\.series-nav a:nth-child\(-n\+2\) \{ grid-column:span 3;/);
-  assert.match(css, /\.series-nav a:nth-child\(n\+3\) \{ grid-column:span 2;/);
+  assert.match(css, /\.series-nav \{[^}]*overflow-x:auto[^}]*scroll-snap-type:x proximity/);
+  assert.match(css, /\.series-nav-track \{[^}]*width:max-content[^}]*min-width:100%/);
+  assert.match(css, /@media \(max-width:520px\)[\s\S]*?\.series-nav-track \{ grid-template-columns:repeat\(5,150px\); \}/);
 });
 
 test("首頁與內頁黑貓維持自然趴姿、全黑耳朵與柔和尾巴", async () => {
@@ -520,11 +526,27 @@ test("私人編輯室不出現在公開導覽且寫入路由有伺服器防線",
   assert.doesNotMatch(topbar, /href="\/studio"/);
   assert.match(postsRoute, /getStudioSessionFromRequest\(request\)/);
   assert.match(postsRoute, /isSameOriginMutation\(request\)/);
+  assert.match(postsRoute, /hasJsonContentType\(request\)/);
   assert.match(auth, /allowedEmails\.size >= 1/);
+  assert.match(auth, /fetchSite === "same-origin"/);
   assert.match(auth, /SameSite=Lax/);
   assert.match(auth, /HttpOnly/);
   assert.match(auth, /headers\(\)/);
   assert.doesNotMatch(auth, /cookies\(\)/);
+});
+
+test("公開頁面帶有 CSP 與瀏覽器安全標頭", async () => {
+  const response = await render("/");
+  const policy = response.headers.get("content-security-policy") ?? "";
+
+  assert.match(policy, /default-src 'self'/);
+  assert.match(policy, /object-src 'none'/);
+  assert.match(policy, /frame-ancestors 'none'/);
+  assert.match(policy, /script-src-attr 'none'/);
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-permitted-cross-domain-policies"), "none");
+  assert.equal(response.headers.get("cross-origin-opener-policy"), "same-origin");
 });
 
 test("Google 登入回呼使用可寫入 Cookie 的重新導向回應", async () => {
@@ -622,4 +644,5 @@ test("studio is restricted to the private Cloudflare Access hostname", async () 
     assert.match(route, /hasStudioGatewayAccess\(request\.headers\)/);
     assert.match(route, /studioNotFoundResponse\(\)/);
   }
+  assert.match(postRoute, /hasJsonContentType\(request\)/);
 });

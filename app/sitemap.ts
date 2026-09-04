@@ -6,6 +6,7 @@ import { techCategories } from "./content/tech";
 export const dynamic = "force-dynamic";
 
 const publicRoutes = ["", "/articles", "/tech", "/tech/quick-look", "/about"];
+const conditionalCategoryRoutes = ["experience", "travel"] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await listPublicPostSummaries(undefined, 500);
@@ -13,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const publishedCategories = new Set(posts.map((post) => post.category));
   return [
     ...publicRoutes.map((path) => ({ url: `${siteUrl}${path}`, changeFrequency: "weekly" as const })),
-    ...["experience", "travel"]
+    ...conditionalCategoryRoutes
       .filter((category) => publishedCategories.has(category))
       .map((category) => ({ url: `${siteUrl}/${category}`, changeFrequency: "weekly" as const })),
     ...techCategories

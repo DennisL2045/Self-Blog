@@ -131,8 +131,14 @@ export function isSameOriginMutation(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return false;
   try {
-    return new URL(origin).origin === new URL(request.url).origin;
+    if (new URL(origin).origin !== new URL(request.url).origin) return false;
+    const fetchSite = request.headers.get("sec-fetch-site")?.toLowerCase();
+    return !fetchSite || fetchSite === "same-origin";
   } catch {
     return false;
   }
+}
+
+export function hasJsonContentType(request: Request): boolean {
+  return request.headers.get("content-type")?.toLowerCase().startsWith("application/json") ?? false;
 }

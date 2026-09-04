@@ -57,17 +57,60 @@ function isCacheablePublicDocument(request: Request) {
   return request.headers.get("Accept")?.includes("text/html") ?? false;
 }
 
+const PUBLIC_CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline'",
+  "script-src-attr 'none'",
+  "connect-src 'self'",
+  "frame-src 'none'",
+  "media-src 'self'",
+  "manifest-src 'self'",
+  "worker-src 'self'",
+].join("; ");
+
+const STUDIO_CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com",
+  "script-src 'self' 'unsafe-inline' https://accounts.google.com",
+  "script-src-attr 'none'",
+  "connect-src 'self' https://accounts.google.com",
+  "frame-src https://accounts.google.com",
+  "media-src 'self'",
+  "manifest-src 'self'",
+  "worker-src 'self'",
+].join("; ");
+
 function withSecurityHeaders(request: Request, response: Response) {
   const headers = new Headers(response.headers);
+  const requestUrl = new URL(request.url);
+  const pathname = requestUrl.pathname;
+  const studioSurface = pathname === "/studio" || pathname.startsWith("/api/studio/");
+  const contentSecurityPolicy = studioSurface ? STUDIO_CONTENT_SECURITY_POLICY : PUBLIC_CONTENT_SECURITY_POLICY;
+  headers.set("Content-Security-Policy", requestUrl.protocol === "https:" ? `${contentSecurityPolicy}; upgrade-insecure-requests` : contentSecurityPolicy);
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
+  headers.set("X-Permitted-Cross-Domain-Policies", "none");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  if (new URL(request.url).protocol === "https:") {
+  headers.set("Cross-Origin-Opener-Policy", studioSurface ? "same-origin-allow-popups" : "same-origin");
+  headers.set("Origin-Agent-Cluster", "?1");
+  if (requestUrl.protocol === "https:") {
     headers.set("Strict-Transport-Security", "max-age=31536000");
   }
-  const pathname = new URL(request.url).pathname;
-  if (pathname === "/studio" || pathname.startsWith("/api/studio/")) {
+  if (studioSurface) {
     headers.set("Cache-Control", "private, no-store");
     headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
   }
