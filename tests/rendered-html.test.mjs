@@ -47,15 +47,18 @@ test("首頁呈現四個清楚的內容入口", async () => {
   assert.match(html, /一隻趴在夜晚窗台上的黑色大眼貓/);
 });
 
-test("品牌圖示採深夜藍 N 並保留完整網站名稱", async () => {
-  const [home, topbar, layout, manifest, icon] = await Promise.all([
+test("品牌圖示採深夜藍月亮並保留完整網站名稱", async () => {
+  const [home, homeHeader, topbar, layout, manifest, icon] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/HomeHeader.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/manifest.ts", import.meta.url), "utf8"),
     readFile(new URL("../public/icon-512x512.png", import.meta.url)),
   ]);
-  assert.match(home, /<BrandMark \/><span className="wordmark-text">夜行手記/);
+  assert.match(home, /<HomeHeader \/>/);
+  assert.match(homeHeader, /<BrandMark \/>/);
+  assert.match(homeHeader, /<span className="wordmark-text">夜行手記/);
   assert.match(topbar, /<BrandMark compact \/><span>夜行手記<\/span>/);
   assert.match(layout, /favicon-48x48\.png/);
   assert.match(layout, /apple-touch-icon\.png/);
@@ -357,22 +360,30 @@ test("上方導覽固定並放大主要閱讀文字", async () => {
   assert.match(styles, /\.published-reading > footer, \.reading-footer, \.collection-footer \{ font-size:\.92rem; \}/);
 });
 
-test("平板與手機使用置中貓咪與漢堡選單", async () => {
-  const [topbar, styles] = await Promise.all([
+test("首頁與內頁在平板、手機使用漢堡選單", async () => {
+  const [homeHeader, topbar, styles] = await Promise.all([
+    readFile(new URL("../app/components/HomeHeader.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/TopBar.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
   assert.match(topbar, /useRef, useState/);
+  assert.match(homeHeader, /id="site-navigation"/);
+  assert.match(homeHeader, /className=\{`site-nav \$\{menuOpen \? "open" : ""\}`\}/);
+  assert.match(homeHeader, /className=\{`site-menu-toggle \$\{menuOpen \? "open" : ""\}`\}/);
+  assert.match(homeHeader, /aria-controls="site-navigation"/);
   assert.match(topbar, /id="inner-navigation"/);
   assert.match(topbar, /className=\{`inner-nav \$\{menuOpen \? "open" : ""\}`\}/);
   assert.match(topbar, /aria-expanded=\{menuOpen\}/);
   assert.match(topbar, /aria-controls="inner-navigation"/);
   assert.match(topbar, /className=\{`menu-toggle \$\{menuOpen \? "open" : ""\}`\}/);
   assert.match(styles, /\.menu-toggle \{ display:none; \}/);
+  assert.match(styles, /\.site-menu-toggle \{ display:none; \}/);
+  assert.match(styles, /@media \(max-width: 820px\)[\s\S]*?\.site-menu-toggle \{[^}]*display:flex/);
+  assert.match(styles, /@media \(max-width: 820px\)[\s\S]*?\.site-nav\.open \{ opacity:1; visibility:visible; pointer-events:auto/);
+  assert.doesNotMatch(styles, /\.site-header > nav > a:nth-child\(2\)/);
   assert.match(styles, /@media \(max-width:1100px\)[\s\S]*?\.topbar-cat \{ left:50%; right:auto; transform:translateX\(-50%\) scale\(\.9\)/);
   assert.match(styles, /@media \(max-width:1100px\)[\s\S]*?\.menu-toggle \{[^}]*display:flex/);
   assert.match(styles, /@media \(max-width:1100px\)[\s\S]*?\.inner-nav\.open \{ opacity:1; visibility:visible; pointer-events:auto/);
-  assert.match(styles, /@media \(max-width:1100px\)[\s\S]*?\.series-nav \{[^}]*overflow-x:auto/);
   assert.match(styles, /@media \(max-width:520px\)[\s\S]*?\.inner-nav \{ left:12px; right:12px; width:auto; grid-template-columns:1fr/);
 });
 

@@ -1,5 +1,6 @@
 import { CatWindow } from "./CatWindow";
-import { BrandMark, DoodleMoon } from "./components/BrandMark";
+import { DoodleMoon } from "./components/BrandMark";
+import { HomeHeader } from "./components/HomeHeader";
 import { HomeLatestNotes } from "./components/HomeLatestNotes";
 import { absoluteSiteUrl, authorName, siteDescription, siteEnglishName, siteName } from "./lib/site";
 
@@ -29,18 +30,7 @@ export default function Home() {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(identityJsonLd).replace(/</g, "\\u003c") }} />
-      <header className="site-header">
-        <a className="wordmark" href="#top" aria-label="夜行手記首頁">
-          <BrandMark /><span className="wordmark-text">夜行手記 <small>Dennis Night Notes</small></span>
-        </a>
-        <nav aria-label="主要選單">
-          <a href="/articles">文章總覽</a>
-          <a href="/tech">技術成長</a>
-          <a href="/experience">個人經歷</a>
-          <a href="/travel">出遊手札</a>
-          <a href="/about">關於</a>
-        </nav>
-      </header>
+      <HomeHeader />
 
       <section className="hero" id="top" aria-labelledby="hero-title">
         <CatWindow />
