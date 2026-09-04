@@ -38,7 +38,7 @@ export default function Home() {
           <p className="eyebrow">A quiet corner on the internet</p>
           <h1 id="hero-title">晚上好，<br />要一起看月亮嗎？</h1>
           <p className="brand-intro">Dennis 的程式學習、系統開發與生活紀錄</p>
-          <p className="intro">這裡收藏慢慢長出的理解：一段程式、一個做過的選擇、一趟旅程，和深夜才想明白的心情。</p>
+          <p className="intro">這裡收藏一些我的理解：一點程式、一趟旅程、一段經歷。</p>
           <a className="read-link" href="#notes">往下讀一點 <span aria-hidden="true">↓</span></a>
         </div>
       </section>
@@ -49,7 +49,7 @@ export default function Home() {
           <a href="/tech"><span>01</span><p>Knowledge</p><h3>技術成長</h3><div>概念、原理、範例與實務取捨。</div></a>
           <a href="/tech/quick-look"><span>02</span><p>Quick glossary</p><h3>簡單看看</h3><div>常見工具名詞與大概使用情境。</div></a>
           <a href="/experience"><span>03</span><p>Experience</p><h3>個人經歷</h3><div>專案、學習歷程與成長轉折。</div></a>
-          <a href="/travel"><span>04</span><p>Travel</p><h3>出遊手札</h3><div>地點、照片與旅途裡的小事。</div></a>
+          <a href="/travel"><span>04</span><p>Travel</p><h3>出遊手札</h3><div>旅途中的一些小事。</div></a>
         </div>
       </section>
 
@@ -67,7 +67,7 @@ export default function Home() {
           <p className="eyebrow">About this place</p>
           <h2>寫給還醒著的人</h2>
         </div>
-        <p>技術不急著解讀完，生活也還得慢慢品嘗。這裡把複雜與概念慢慢拆解，也留下做過的事與走過的地方。期許你我來到這裡時，能像貓一樣，找到舒服的位置趴一會兒。</p>
+        <p>技術不急著解讀完，生活還得慢慢品嘗。把複雜與概念慢慢拆解，留下做過的事與走過的地方。</p>
       </section>
 
       <footer>
